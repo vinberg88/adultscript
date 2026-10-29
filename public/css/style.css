@@ -71,6 +71,43 @@ nav a:hover {
     font-weight: bold;
     font-size: 0.9rem;
 }
+.card-info {
+    padding: 15px;
+}
+.card-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: #aaa;
+}
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.video-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+.like-btn, .share-btn {
+    background: #333;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+.like-btn:hover, .share-btn:hover {
+    background: #ff9900;
+    color: #000;
+    border-color: #ff9900;
+}
 .video-container {
     max-width: 1000px;
     margin: 40px auto;
