@@ -7,6 +7,8 @@ const { readSiteConfig, createSiteConfig, verifyAdminPassword, safeEqual } = req
 const { readVideos, writeVideos } = require('./video-store');
 const links = require('./links.json');
 const { siteForHost } = require('./site-profile');
+const { readSettings, writeSettings, THEMES } = require('./admin-settings');
+const { suggest } = require('./admin-ai');
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -131,8 +133,30 @@ app.get('/video/:id', async (req, res) => {
 // Secret Admin Panel
 app.get('/secret-admin-panel-777', async (req, res) => {
     await loadVideos();
+    const settings = await readSettings();
     const added = /^\d+$/.test(req.query.added || '') ? Number(req.query.added) : undefined;
-    res.render('admin', { videos: videoCache, added });
+    res.render('admin', { videos: videoCache, added, saved: req.query.saved === '1', settings, themes: THEMES, suggestion: null, error: null });
+});
+
+app.post('/admin/settings', async (req, res) => {
+    try {
+        await writeSettings(req.body);
+        res.redirect('/secret-admin-panel-777?saved=1');
+    } catch (error) {
+        await loadVideos();
+        res.status(400).render('admin', { videos: videoCache, added: undefined, settings: await readSettings(), themes: THEMES, suggestion: null, error: error.message });
+    }
+});
+
+app.post('/admin/ai/:kind', async (req, res) => {
+    await loadVideos();
+    const settings = await readSettings();
+    try {
+        const suggestion = await suggest(req.params.kind, { site: res.locals.site, videos: videoCache, settings });
+        res.render('admin', { videos: videoCache, added: undefined, settings, themes: THEMES, suggestion, error: null });
+    } catch (error) {
+        res.status(400).render('admin', { videos: videoCache, added: undefined, settings, themes: THEMES, suggestion: null, error: error.message });
+    }
 });
 
 app.post('/admin/delete/:id', async (req, res) => {
@@ -150,7 +174,8 @@ app.post('/admin/clear', async (req, res) => {
 
 app.post('/admin/force-import', async (req, res) => {
     try {
-        const result = await importVideos();
+        const settings = await readSettings();
+        const result = await importVideos(settings.saved ? { pages: settings.importPages, search: settings.importSearch } : undefined);
         await loadVideos(); // Refresh cache
         res.redirect(`/secret-admin-panel-777?added=${result.added}`);
     } catch (e) {
@@ -166,7 +191,9 @@ const startImport = async () => {
             console.log('Waiting for web installation before importing.');
             return;
         }
-        const result = await importVideos();
+        const settings = await readSettings();
+        if (!settings.autoImport) return;
+        const result = await importVideos(settings.saved ? { pages: settings.importPages, search: settings.importSearch } : undefined);
         console.log('Import complete:', result);
     } catch (err) {
         console.error('Initial import error (app will still run):', err);
@@ -174,9 +201,11 @@ const startImport = async () => {
 };
 
 if (require.main === module) {
-    cron.schedule('0 0 * * *', () => {
-        console.log('Running scheduled daily import...');
-        startImport();
+    cron.schedule('0 * * * *', async () => {
+        try {
+            const settings = await readSettings();
+            if (settings.autoImport && new Date().getHours() === settings.importHour) startImport();
+        } catch (error) { console.error('Scheduled import settings error:', error); }
     });
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {

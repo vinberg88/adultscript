@@ -6,10 +6,10 @@
     <title>Admin Panel - <%= site.name %></title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body style="--accent: <%= site.accent %>; background-color: #0f0f0f; color: white;">
+<body class="admin-page admin-theme-<%= settings.theme %>" style="--admin-accent: <%= settings.accent %>">
     <div class="admin-container">
         <div class="admin-header">
-            <h1>Sajthuvud: Kontrollpanel</h1>
+            <h1><%= site.name %> · Kontrollpanel</h1>
             <a href="/" class="action-btn">Till startsidan</a>
             <form action="/admin/force-import" method="POST">
                 <button type="submit" class="btn-success"><i class="fas fa-sync"></i> Tvinga Import Nu</button>
@@ -17,6 +17,37 @@
         </div>
 
         <% if (typeof added !== 'undefined') { %><p>Import klar: <%= added %> nya filmer.</p><% } %>
+        <% if (typeof saved !== 'undefined' && saved) { %><p class="admin-notice">Inställningarna har sparats.</p><% } %>
+        <% if (error) { %><p class="admin-alert" role="alert"><%= error %></p><% } %>
+        <% if (suggestion) { %><section class="admin-card"><h2>AI-förslag för granskning</h2><p class="admin-suggestion"><%= suggestion %></p><p>Inget har sparats eller publicerats.</p></section><% } %>
+
+        <section class="admin-card">
+            <h2>Utseende och automatisk import</h2>
+            <form action="/admin/settings" method="POST" class="admin-settings-form">
+                <label>Tema
+                    <select name="theme">
+                        <% themes.forEach(theme => { %><option value="<%= theme %>" <%= settings.theme === theme ? 'selected' : '' %>><%= {midnight:'Midnatt',ocean:'Hav',forest:'Skog',sunset:'Solnedgång'}[theme] %></option><% }) %>
+                    </select>
+                </label>
+                <label>Accentfärg <input name="accent" type="color" value="<%= settings.accent %>"></label>
+                <label class="admin-check"><input name="autoImport" type="checkbox" <%= settings.autoImport ? 'checked' : '' %>> Automatisk import varje dag</label>
+                <label>Timme enligt serverns tidszon <input name="importHour" type="number" min="0" max="23" value="<%= settings.importHour %>"></label>
+                <label>Antal importsidor <input name="importPages" type="number" min="1" max="5" value="<%= settings.importPages %>"></label>
+                <label>Sökord <input name="importSearch" maxlength="100" value="<%= settings.importSearch %>"></label>
+                <button type="submit" class="btn-success">Spara inställningar</button>
+            </form>
+            <p>Manuell import med knappen ovan fungerar även om automatisk import är avstängd.</p>
+        </section>
+
+        <section class="admin-card">
+            <h2>AI-hjälp</h2>
+            <p>Förslag visas bara här. Endast antal filmer, källor och sajtens namn skickas till AI-tjänsten, aldrig lösenord eller filmtitlar.</p>
+            <div class="admin-ai-actions">
+                <form action="/admin/ai/import" method="POST"><button type="submit" class="btn-success">Analysera importen</button></form>
+                <form action="/admin/ai/text" method="POST"><button type="submit" class="btn-success">Föreslå sajttext</button></form>
+            </div>
+            <p>Funktionen kräver <code>OPENAI_API_KEY</code> i servermiljön. <code>OPENAI_MODEL</code> är valfri.</p>
+        </section>
 
         <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
             <p>Totalt antal filmer i databasen: <strong><%= videos.length %></strong></p>

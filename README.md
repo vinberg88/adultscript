@@ -14,6 +14,12 @@ Node.js videoportal för cPanel. Importören hämtar metadata från Pornhubs Web
 
 Namnet hämtas automatiskt från domänens rad i `links.json`. För andra domäner används första delen av domännamnet, till exempel **Snusk** för `snusk.eu`. Du kan ändra namnet med `SITE_NAME` och accentfärgen med `SITE_ACCENT` (format `#RRGGBB`) i App Env. `PORN_HUB_IMPORT_PAGES` (1–5) och `PORN_HUB_SEARCH` styr varje apps egen filmimport. Ändringar i App Env kräver **Redeploy**.
 
+## Admin: teman, import och AI-förslag
+
+I adminpanelen kan du välja mellan fyra teman, ställa in accentfärg, slå av eller på automatisk import, välja daglig timme enligt serverns tidszon, antal importsidor och sökord. Inställningarna sparas per app i `data/admin-settings.json`. Utan sparade inställningar gäller fortfarande tidigare App Env eller webbinstallerns importval; automatisk import sker vid start och dagligen omkring klockan 00 enligt serverns tidszon. Den manuella importknappen fungerar även när automatisk import är avstängd.
+
+Två AI-knappar ger förslag om importen och tre utkast till neutral sajttext. Förslagen visas bara i admin och ändrar eller publicerar inget. Om du vill aktivera dem sätter du `OPENAI_API_KEY` i appens **servermiljö**, aldrig i GitHub eller webbsidan. Standardmodellen är `gpt-6-luna`; `OPENAI_MODEL` kan användas för att välja en annan tillgänglig modell. API-anropen skickar bara aggregerat filmantal och källor samt sajtens namn/domän för textförslag; filmtitlar och lösenord skickas inte. Funktionen använder OpenAI API och kan medföra API-kostnad; eventuella API-krediter beror på ditt konto. Utan nyckel fungerar resten av adminpanelen som vanligt.
+
 Varje app använder sin egen `data/videos.json`. Vid första starten kopieras en eventuell äldre `videos.json` dit utan att originalet tas bort. Innan du uppdaterar en befintlig sajt, ta ändå en separat säkerhetskopia av `videos.json` och `data/site.json` och kontrollera filmantalet efteråt. cPanels hantering av appdata vid redeploy måste verifieras på en testsajt innan samma uppdatering görs på alla sajter.
 
 Kör `npm run sites:plan -- sökväg/till/site-plan.csv` för att skapa en granskningslista av de **64 unika domänerna** i `links.json`. Fyll i status och eventuella sökord/färger i listan. Den innehåller inga lösenord och skapar inte appar i cPanel.

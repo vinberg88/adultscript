@@ -18,6 +18,9 @@ test('admin requires a password and rejects cross-site writes', async () => {
         const authorization = `Basic ${Buffer.from('admin:test-only-password').toString('base64')}`;
         const authenticated = await fetch(`${base}/secret-admin-panel-777`, { headers: { authorization } });
         assert.equal(authenticated.status, 200);
+        const adminHtml = await authenticated.text();
+        assert.match(adminHtml, /Utseende och automatisk import/);
+        assert.match(adminHtml, /Föreslå sajttext/);
         const crossSite = await fetch(`${base}/admin/force-import`, {
             method: 'POST', headers: { authorization, origin: 'https://attacker.example' }
         });
