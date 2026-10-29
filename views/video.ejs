@@ -15,6 +15,7 @@
             <nav aria-label="Huvudmeny">
                 <a href="/"><i class="fas fa-home"></i> Hem</a>
                 <a href="/#filmer"><i class="fas fa-play"></i> Filmer</a>
+                <a href="/kategorier"><i class="fas fa-layer-group"></i> Kategorier</a>
                 <a href="/lankar"><i class="fas fa-link"></i> Länkar</a>
             </nav>
         </div>
@@ -44,6 +45,11 @@
                         <% if (video.rating != null) { %><span class="action-btn"><i class="fas fa-thumbs-up"></i> <%= video.rating.toLocaleString('sv-SE', { maximumFractionDigits: 1 }) %>%</span><% } %>
                         <% if (video.source === 'Pornhub') { %><a class="action-btn" href="<%= video.url %>" rel="noopener noreferrer" target="_blank">Visa hos Pornhub</a><% } %>
                     </div>
+                    <% if (videoCategories.length) { %>
+                        <div class="video-categories" aria-label="Filmens kategorier">
+                            <% videoCategories.forEach(slug => { %><a class="category-chip" href="/?category=<%= slug %>#filmer"><%= slug.replace(/-/g, ' ') %></a><% }) %>
+                        </div>
+                    <% } %>
                 </div>
             </div>
 
@@ -68,6 +74,7 @@
             <div class="footer-links">
                 <a href="/">Hem</a>
                 <a href="/#filmer">Filmer</a>
+                <a href="/kategorier">Kategorier</a>
                 <a href="/lankar">Länkar</a>
             </div>
             <p>&copy; <%= new Date().getFullYear() %> <%= site.name %>.</p>

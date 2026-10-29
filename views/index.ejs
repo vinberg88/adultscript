@@ -16,6 +16,7 @@
             <nav aria-label="Huvudmeny">
                 <a href="/"><i class="fas fa-home"></i> Hem</a>
                 <a href="/#filmer"><i class="fas fa-play"></i> Filmer</a>
+                <a href="/kategorier"><i class="fas fa-layer-group"></i> Kategorier</a>
                 <a href="/lankar"><i class="fas fa-link"></i> Länkar</a>
             </nav>
         </div>
@@ -31,10 +32,24 @@
 
     <main id="filmer">
         <div class="category-bar" aria-label="Sortera filmer">
-            <a class="cat-tag <%= sort === 'latest' ? 'active' : '' %>" href="/?sort=latest#filmer" <%- sort === 'latest' ? 'aria-current="page"' : '' %>>Senaste</a>
-            <a class="cat-tag <%= sort === 'views' ? 'active' : '' %>" href="/?sort=views#filmer" <%- sort === 'views' ? 'aria-current="page"' : '' %>>Mest sedda</a>
-            <a class="cat-tag <%= sort === 'rating' ? 'active' : '' %>" href="/?sort=rating#filmer" <%- sort === 'rating' ? 'aria-current="page"' : '' %>>Högst betyg</a>
+            <a class="cat-tag <%= sort === 'latest' ? 'active' : '' %>" href="/?sort=latest<%= categorySuffix %>#filmer" <%- sort === 'latest' ? 'aria-current="page"' : '' %>>Senaste</a>
+            <a class="cat-tag <%= sort === 'views' ? 'active' : '' %>" href="/?sort=views<%= categorySuffix %>#filmer" <%- sort === 'views' ? 'aria-current="page"' : '' %>>Mest sedda</a>
+            <a class="cat-tag <%= sort === 'rating' ? 'active' : '' %>" href="/?sort=rating<%= categorySuffix %>#filmer" <%- sort === 'rating' ? 'aria-current="page"' : '' %>>Högst betyg</a>
         </div>
+        <% if (categories.length) { %>
+            <section class="category-section" aria-label="Filmkategorier">
+                <div class="category-section-heading"><h2>Kategorier</h2><a href="/kategorier">Visa alla →</a></div>
+                <div class="category-chips">
+                    <a class="category-chip <%= selectedCategory ? '' : 'active' %>" href="/?sort=<%= sort %>#filmer">Alla</a>
+                    <% categories.slice(0, 12).forEach(category => { %>
+                        <a class="category-chip <%= selectedCategory === category.slug ? 'active' : '' %>" href="/?sort=<%= sort %>&amp;category=<%= category.slug %>#filmer"><%= category.label %> <span><%= category.count %></span></a>
+                    <% }) %>
+                </div>
+                <% if (selectedCategory && !categories.slice(0, 12).some(category => category.slug === selectedCategory)) { %>
+                    <p class="selected-category">Visar <%= categories.find(category => category.slug === selectedCategory).label %> · <a href="/?sort=<%= sort %>#filmer">Rensa filter</a></p>
+                <% } %>
+            </section>
+        <% } %>
         <% if (pagination.total) { %><p class="video-count">Visar <%= pagination.from.toLocaleString('sv-SE') %>–<%= pagination.to.toLocaleString('sv-SE') %> av <%= pagination.total.toLocaleString('sv-SE') %> filmer</p><% } %>
 
         <div class="video-grid">
@@ -59,11 +74,11 @@
         </div>
         <% if (pagination.totalPages > 1) { %>
             <nav class="pagination" aria-label="Filmsidor">
-                <% if (pagination.page > 1) { %><a href="/?sort=<%= sort %>&page=<%= pagination.page - 1 %>#filmer" rel="prev">← Föregående</a><% } %>
+                <% if (pagination.page > 1) { %><a href="/?sort=<%= sort %><%= categorySuffix %>&amp;page=<%= pagination.page - 1 %>#filmer" rel="prev">← Föregående</a><% } %>
                 <% pagination.pages.forEach(number => { %>
-                    <% if (number === null) { %><span class="pagination-gap" aria-hidden="true">…</span><% } else if (number === pagination.page) { %><span class="pagination-current" aria-current="page"><%= number %></span><% } else { %><a href="/?sort=<%= sort %>&page=<%= number %>#filmer"><%= number %></a><% } %>
+                    <% if (number === null) { %><span class="pagination-gap" aria-hidden="true">…</span><% } else if (number === pagination.page) { %><span class="pagination-current" aria-current="page"><%= number %></span><% } else { %><a href="/?sort=<%= sort %><%= categorySuffix %>&amp;page=<%= number %>#filmer"><%= number %></a><% } %>
                 <% }) %>
-                <% if (pagination.page < pagination.totalPages) { %><a href="/?sort=<%= sort %>&page=<%= pagination.page + 1 %>#filmer" rel="next">Nästa →</a><% } %>
+                <% if (pagination.page < pagination.totalPages) { %><a href="/?sort=<%= sort %><%= categorySuffix %>&amp;page=<%= pagination.page + 1 %>#filmer" rel="next">Nästa →</a><% } %>
             </nav>
         <% } %>
     </main>
@@ -75,6 +90,7 @@
             <div class="footer-links">
                 <a href="/">Hem</a>
                 <a href="/#filmer">Filmer</a>
+                <a href="/kategorier">Kategorier</a>
                 <a href="/lankar">Länkar</a>
             </div>
             <p>&copy; <%= new Date().getFullYear() %> <%= site.name %>.</p>

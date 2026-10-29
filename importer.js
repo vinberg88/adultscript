@@ -1,5 +1,6 @@
 const { readSiteConfig } = require('./config');
 const { DATA_FILE, readVideos, writeVideos } = require('./video-store');
+const { normalizeCategories } = require('./categories');
 const API_URL = 'https://www.pornhub.com/webmasters/search';
 let currentImport;
 
@@ -29,6 +30,7 @@ function normalizeVideo(video) {
         duration: /^\d+(?::\d{1,2}){1,2}$/.test(String(video.duration || '')) ? String(video.duration) : null,
         views: Number.isFinite(Number(video.views)) ? Number(video.views) : null,
         rating: Number.isFinite(Number(video.rating)) ? Number(video.rating) : null,
+        categories: normalizeCategories(video.categories),
         date: String(video.publish_date || new Date().toISOString())
     };
 }
@@ -57,15 +59,26 @@ async function runImport({ fetchImpl = fetch, dataFile = DATA_FILE, pages, searc
     }
 
     const existing = await readVideos(dataFile);
-    const existingIds = new Set(existing.filter(v => v && v.source === 'Pornhub').map(v => {
-        if (v.sourceId) return String(v.sourceId);
-        try { return new URL(v.url).searchParams.get('viewkey'); } catch { return null; }
-    }));
+    const existingIds = new Set();
+    let enriched = 0;
+    const updated = existing.map(video => {
+        if (!video || video.source !== 'Pornhub') return video;
+        let id = video.sourceId ? String(video.sourceId) : null;
+        if (!id) {
+            try { id = new URL(video.url).searchParams.get('viewkey'); } catch { /* leave unknown IDs unchanged */ }
+        }
+        if (!id) return video;
+        existingIds.add(id);
+        const fresh = incoming.get(id);
+        if (!fresh?.categories.length || normalizeCategories(video.categories).length) return video;
+        enriched++;
+        return { ...video, categories: fresh.categories };
+    });
     const additions = [...incoming.values()].filter(v => !existingIds.has(v.sourceId));
-    if (additions.length) {
-        await writeVideos([...existing, ...additions], dataFile);
+    if (additions.length || enriched) {
+        await writeVideos([...updated, ...additions], dataFile);
     }
-    return { fetched: incoming.size, added: additions.length, total: existing.length + additions.length };
+    return { fetched: incoming.size, added: additions.length, enriched, total: existing.length + additions.length };
 }
 
 function importVideos(options) {

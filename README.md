@@ -8,6 +8,8 @@ Node.js videoportal för cPanel. Importören hämtar metadata från Pornhubs Web
 
 Startsidan visar högst 100 filmer per sida med numrerade sidor och Föregående/Nästa. Sorteringen följer med när man byter sida; miniatyrbilder laddas först när de behövs.
 
+`/kategorier` visar kategorier som faktiskt finns i Pornhubs videometadata. Välj en kategori för att filtrera filmerna; sortering och sidbyte behåller filtret. Nya importerade filmer får kategorier direkt. Vid nästa import fylls kategorier även på för befintliga Pornhub-filmer som fortfarande finns i de hämtade importsidorna. Filmer utan kategoridata visas fortfarande under Alla.
+
 ## Snabbstart för många sajter
 
 1. Skapa **en egen Node.js-app per domän** i cPanel. Välj Git-källan `https://github.com/vinberg88/adultscript.git` och Node.js 22 eller senare.
