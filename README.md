@@ -1,7 +1,5 @@
 # AdultScript - Sök bland filmerna =)
 
----
-
 <img width="700" height="380" alt="57687c" src="https://github.com/user-attachments/assets/16c183d9-c309-47cb-b862-36d31a82a30a" />
 
 ---
