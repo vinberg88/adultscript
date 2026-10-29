@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
+const { readSiteConfig } = require('./config');
 
 const DATA_FILE = path.join(__dirname, 'videos.json');
 const API_URL = 'https://www.pornhub.com/webmasters/search';
@@ -35,7 +36,10 @@ function normalizeVideo(video) {
     };
 }
 
-async function runImport({ fetchImpl = fetch, dataFile = DATA_FILE, pages = process.env.PORN_HUB_IMPORT_PAGES, search = process.env.PORN_HUB_SEARCH || '' } = {}) {
+async function runImport({ fetchImpl = fetch, dataFile = DATA_FILE, pages, search } = {}) {
+    const config = await readSiteConfig();
+    pages ??= config?.pornhubImportPages ?? process.env.PORN_HUB_IMPORT_PAGES;
+    search ??= config?.pornhubSearch ?? process.env.PORN_HUB_SEARCH ?? '';
     const count = pageCount(pages);
     const incoming = new Map();
 

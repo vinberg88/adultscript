@@ -3,8 +3,8 @@ const app = express();
 const path = require('path');
 const fs = require('fs-extra');
 const cron = require('node-cron');
-const crypto = require('crypto');
 const { importVideos } = require('./importer');
+const { readSiteConfig, createSiteConfig, verifyAdminPassword, safeEqual } = require('./config');
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -16,33 +16,42 @@ app.set('views', path.join(__dirname, 'views'));
 
 const DATA_FILE = path.join(__dirname, 'videos.json');
 
-function adminAuth(req, res, next) {
+function installerEnabled() {
+    return typeof process.env.INSTALL_TOKEN === 'string' && process.env.INSTALL_TOKEN.length >= 32;
+}
+
+function sameOrigin(req, res, next) {
+    const origin = req.get('origin');
+    let matches = false;
+    try { matches = new URL(origin).host.toLowerCase() === req.get('host').toLowerCase(); } catch { /* missing or invalid Origin */ }
+    if (!matches) return res.status(403).send('Ogiltigt ursprung för begäran');
+    next();
+}
+
+async function adminAuth(req, res, next) {
     res.set('Cache-Control', 'no-store');
-    const password = process.env.ADMIN_PASSWORD;
-    if (!password) return res.status(503).send('Set ADMIN_PASSWORD to enable the admin panel');
-    const match = /^Basic ([A-Za-z0-9+/=]+)$/.exec(req.get('authorization') || '');
-    let credentials = '';
-    if (match) credentials = Buffer.from(match[1], 'base64').toString('utf8');
-    const separator = credentials.indexOf(':');
-    const user = separator < 0 ? '' : credentials.slice(0, separator);
-    const supplied = separator < 0 ? '' : credentials.slice(separator + 1);
-    const expectedUser = process.env.ADMIN_USER || 'admin';
-    const a = Buffer.from(supplied);
-    const b = Buffer.from(password);
-    if (user === expectedUser && a.length === b.length && crypto.timingSafeEqual(a, b)) return next();
-    res.set('WWW-Authenticate', 'Basic realm="AdultScript admin"');
-    return res.status(401).send('Authentication required');
+    try {
+        const config = await readSiteConfig();
+        const password = process.env.ADMIN_PASSWORD;
+        if (!config && !password) return res.status(503).send('Slutför /install eller ange ADMIN_PASSWORD');
+        const match = /^Basic ([A-Za-z0-9+/=]+)$/.exec(req.get('authorization') || '');
+        const credentials = match ? Buffer.from(match[1], 'base64').toString('utf8') : '';
+        const separator = credentials.indexOf(':');
+        const user = separator < 0 ? '' : credentials.slice(0, separator);
+        const supplied = separator < 0 ? '' : credentials.slice(separator + 1);
+        const valid = config
+            ? user === config.adminUser && verifyAdminPassword(supplied, config)
+            : user === (process.env.ADMIN_USER || 'admin') && safeEqual(supplied, password);
+        if (valid) return next();
+        res.set('WWW-Authenticate', 'Basic realm="AdultScript admin"');
+        return res.status(401).send('Inloggning krävs');
+    } catch (error) {
+        next(error);
+    }
 }
 
 app.use(['/secret-admin-panel-777', '/admin'], adminAuth);
-app.use('/admin', (req, res, next) => {
-    if (req.method !== 'POST') return next();
-    const origin = req.get('origin');
-    let sameHost = false;
-    try { sameHost = new URL(origin).host === req.get('host'); } catch { /* missing or invalid Origin */ }
-    if (!sameHost) return res.status(403).send('Invalid request origin');
-    next();
-});
+app.use('/admin', (req, res, next) => req.method === 'POST' ? sameOrigin(req, res, next) : next());
 
 // Robust JSON loading with caching
 let videoCache = [];
@@ -62,6 +71,28 @@ async function loadVideos() {
 }
 
 // Routes
+app.get('/install', async (req, res, next) => {
+    try {
+        if (!installerEnabled() || await readSiteConfig()) return res.sendStatus(404);
+        res.set('Cache-Control', 'no-store').render('install', { error: null });
+    } catch (error) { next(error); }
+});
+
+app.post('/install', sameOrigin, async (req, res, next) => {
+    try {
+        if (!installerEnabled() || await readSiteConfig()) return res.sendStatus(404);
+        await createSiteConfig(req.body);
+        if (require.main === module) importVideos().catch(console.error);
+        res.redirect('/secret-admin-panel-777?installed=1');
+    } catch (error) {
+        if (error.status === 400 || error.status === 403 || error.status === 409) {
+            return res.status(error.status)
+                .set('Cache-Control', 'no-store').render('install', { error: error.message });
+        }
+        next(error);
+    }
+});
+
 app.get('/', async (req, res) => {
     await loadVideos();
     const realVideos = videoCache.filter(v => v.source !== 'Automated');
@@ -116,11 +147,14 @@ app.post('/admin/force-import', async (req, res) => {
 
 // Startup Import - Moved to run AFTER the server starts to prevent cPanel deployment failure
 const startImport = async () => {
-    console.log('Starting initial import...');
+    console.log('Starting import...');
     try {
+        if (installerEnabled() && !(await readSiteConfig())) {
+            console.log('Waiting for web installation before importing.');
+            return;
+        }
         const result = await importVideos();
         console.log('Import complete:', result);
-        console.log('Initial import completed successfully.');
     } catch (err) {
         console.error('Initial import error (app will still run):', err);
     }
@@ -129,7 +163,7 @@ const startImport = async () => {
 if (require.main === module) {
     cron.schedule('0 0 * * *', () => {
         console.log('Running scheduled daily import...');
-        importVideos().then(result => console.log('Import complete:', result)).catch(console.error);
+        startImport();
     });
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {

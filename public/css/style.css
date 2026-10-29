@@ -236,3 +236,19 @@ footer p { color: #555; font-size: 0.8rem; }
     .video-page-layout { grid-template-columns: 1fr; }
     .header-container { flex-direction: column; gap: 10px; }
 }
+/* One-time installer */
+.install-page { min-height: 100vh; display: grid; place-items: center; padding: 28px 16px; background: #101014; color: #f5f5f7; }
+.install-card { width: min(100%, 560px); padding: 32px; border: 1px solid #33343e; border-radius: 18px; background: #1b1c23; box-shadow: 0 24px 70px rgba(0,0,0,.35); }
+.install-eyebrow { color: #ff7186; font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.install-card h1 { margin: 10px 0 12px; font-size: 2rem; }
+.install-card p { color: #c2c3ce; line-height: 1.5; }
+.install-form { display: grid; gap: 10px; margin-top: 26px; }
+.install-form label { margin-top: 8px; font-weight: 600; }
+.install-form input, .install-form select { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #515260; border-radius: 9px; background: #111218; color: #fff; font: inherit; }
+.install-form input:focus, .install-form select:focus { outline: 2px solid #ff7186; outline-offset: 1px; }
+.install-optional { color: #a5a6b0; font-weight: 400; }
+.install-submit { margin-top: 18px; min-height: 48px; border: 0; border-radius: 9px; background: #e43555; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.install-submit:hover { background: #f24968; }
+.install-error { padding: 12px; border: 1px solid #f25e75; border-radius: 8px; background: #4b1f2a; color: #fff !important; }
+.install-note { margin-bottom: 0; font-size: .88rem; }
+@media (max-width: 600px) { .install-card { padding: 22px; } .install-card h1 { font-size: 1.6rem; } }
