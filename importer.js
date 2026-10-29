@@ -1,108 +1,83 @@
 const fs = require('fs-extra');
-const axios = require('axios');
-const cheerio = require('cheerio');
 const path = require('path');
 
 const DATA_FILE = path.join(__dirname, 'videos.json');
+const API_URL = 'https://www.pornhub.com/webmasters/search';
+let currentImport;
 
-const SOURCES = [
-    {
-        name: 'Pornhub',
-        url: 'https://www.pornhub.com/video/webmasterss',
-        selectors: {
-            item: '.video-item, .video-card',
-            title: '.title, .video-title',
-            link: 'a.video-link, a[href*="/video/"]',
-            thumb: 'img.thumb, img[src*="preview"]'
-        }
-    },
-    {
-        name: 'eVideos',
-        url: 'https://evideos.com', // Simplified for example, usually requires specific pages
-        selectors: {
-            item: '.video-entry, .video-item',
-            title: '.title, h3',
-            link: 'a',
-            thumb: 'img'
-        }
+function pageCount(value) {
+    const count = Number(value || 1);
+    if (!Number.isInteger(count) || count < 1 || count > 5) {
+        throw new Error('PORN_HUB_IMPORT_PAGES must be an integer from 1 to 5');
     }
-];
-
-const SEO_PREFIXES = ['Heta', 'Bästa', 'Premium', 'Snygga', 'Hårda', 'Exklusiva', 'Snabba'];
-
-async function importVideos() {
-    console.log('Starting Multi-Source Import...');
-    let allImported = [];
-
-    for (const source of SOURCES) {
-        try {
-            console.log(`Fetching from ${source.name}...`);
-            const { data } = await axios.get(source.url, { 
-                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36' },
-                timeout: 10000 
-            });
-            const $ = cheerio.load(data);
-            
-            $(source.selectors.item).each((i, elem) => {
-                const title = $(elem).find(source.selectors.title).text().trim();
-                let link = $(elem).find(source.selectors.link).attr('href');
-                const thumb = $(elem).find(source.selectors.thumb).attr('src');
-
-                if (link && title) {
-                    if (link.startsWith('/')) {
-                        link = (source.name === 'Pornhub' ? 'https://www.pornhub.com' : 'https://evideos.com') + link;
-                    }
-                    
-                    const prefix = SEO_PREFIXES[Math.floor(Math.random() * SEO_PREFIXES.length)];
-                    allImported.push({
-                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                        title: `${prefix} ${title} - Gratis Erotik`,
-                        url: link,
-                        thumbnail: thumb || `https://picsum.photos/seed/${Math.random()}/300/169`,
-                        source: source.name,
-                        date: new Date().toISOString()
-                    });
-                }
-            });
-        } catch (e) {
-            console.error(`Error scraping ${source.name}:`, e.message);
-        }
-    }
-
-    // Load existing videos
-    let existingVideos = [];
-    try {
-        if (await fs.pathExists(DATA_FILE)) {
-            existingVideos = await fs.readJson(DATA_FILE);
-        }
-    } catch (e) {
-        existingVideos = [];
-    }
-
-    // Merge and remove duplicates based on URL
-    const urlSet = new Set(existingVideos.map(v => v.url));
-    const uniqueNew = allImported.filter(v => !urlSet.has(v.url));
-    
-    const finalVideos = [...existingVideos, ...uniqueNew];
-
-    // Fallback: Ensure at least 500 new videos per day (simulated growth)
-    if (uniqueNew.length < 500) {
-        const deficit = 500 - uniqueNew.length;
-        for (let i = 0; i < deficit; i++) {
-            const prefix = SEO_PREFIXES[Math.floor(Math.random() * SEO_PREFIXES.length)];
-            finalVideos.push({
-                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                title: `${prefix} Häftig Film ${Math.floor(Math.random() * 100000)} - Gratis Erotik`,
-                url: 'https://www.w3schools.com/html/mov_bbb.mp4',
-                thumbnail: `https://picsum.photos/seed/${Math.random()}/300/169`,
-                source: 'Automated',
-                date: new Date().toISOString()
-            });
-        }
-    }
-
-    await fs.writeJson(DATA_FILE, finalVideos, { spaces: 2 });
-    console.log(`Import complete. Total videos in DB: ${finalVideos.length}`);
+    return count;
 }
 
-module.exports = { importVideos };
+function normalizeVideo(video) {
+    if (!video || !/^[a-zA-Z0-9]+$/.test(String(video.video_id || ''))) return null;
+    const id = String(video.video_id);
+    const title = String(video.title || '').trim();
+    if (!title) return null;
+    const thumbnail = String(video.default_thumb || video.thumb || '');
+    if (!thumbnail.startsWith('https://')) return null;
+    return {
+        id: `pornhub-${id}`,
+        sourceId: id,
+        source: 'Pornhub',
+        title,
+        url: `https://www.pornhub.com/view_video.php?viewkey=${id}`,
+        embedUrl: `https://www.pornhub.com/embed/${id}`,
+        thumbnail,
+        duration: /^\d+(?::\d{1,2}){1,2}$/.test(String(video.duration || '')) ? String(video.duration) : null,
+        views: Number.isFinite(Number(video.views)) ? Number(video.views) : null,
+        rating: Number.isFinite(Number(video.rating)) ? Number(video.rating) : null,
+        date: String(video.publish_date || new Date().toISOString())
+    };
+}
+
+async function runImport({ fetchImpl = fetch, dataFile = DATA_FILE, pages = process.env.PORN_HUB_IMPORT_PAGES, search = process.env.PORN_HUB_SEARCH || '' } = {}) {
+    const count = pageCount(pages);
+    const incoming = new Map();
+
+    for (let page = 1; page <= count; page++) {
+        const url = new URL(API_URL);
+        url.searchParams.set('ordering', 'newest');
+        url.searchParams.set('page', String(page));
+        if (search) url.searchParams.set('search', search);
+
+        const response = await fetchImpl(url, { signal: AbortSignal.timeout(15000) });
+        if (!response.ok) throw new Error(`Pornhub API returned HTTP ${response.status}`);
+        const body = await response.json();
+        if (!Array.isArray(body.videos)) throw new Error('Pornhub API did not return a videos list');
+        for (const raw of body.videos) {
+            const video = normalizeVideo(raw);
+            if (video) incoming.set(video.sourceId, video);
+        }
+    }
+
+    if (!(await fs.pathExists(dataFile))) await fs.writeJson(dataFile, []);
+    const existing = await fs.readJson(dataFile);
+    if (!Array.isArray(existing)) throw new Error('videos.json must contain an array');
+    const existingIds = new Set(existing.filter(v => v && v.source === 'Pornhub').map(v => {
+        if (v.sourceId) return String(v.sourceId);
+        try { return new URL(v.url).searchParams.get('viewkey'); } catch { return null; }
+    }));
+    const additions = [...incoming.values()].filter(v => !existingIds.has(v.sourceId));
+    if (additions.length) {
+        const temporary = `${dataFile}.${process.pid}.tmp`;
+        try {
+            await fs.writeJson(temporary, [...existing, ...additions], { spaces: 2 });
+            await fs.rename(temporary, dataFile);
+        } finally {
+            await fs.remove(temporary);
+        }
+    }
+    return { fetched: incoming.size, added: additions.length, total: existing.length + additions.length };
+}
+
+function importVideos(options) {
+    if (!currentImport) currentImport = runImport(options).finally(() => { currentImport = null; });
+    return currentImport;
+}
+
+module.exports = { importVideos, normalizeVideo };
