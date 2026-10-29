@@ -5,6 +5,7 @@ const fs = require('fs-extra');
 const cron = require('node-cron');
 const { importVideos } = require('./importer');
 const { readSiteConfig, createSiteConfig, verifyAdminPassword, safeEqual } = require('./config');
+const links = require('./links.json');
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -97,8 +98,20 @@ app.post('/install', sameOrigin, async (req, res, next) => {
 app.get('/', async (req, res) => {
     await loadVideos();
     const realVideos = videoCache.filter(v => v.source !== 'Automated');
-    const shuffled = [...(realVideos.length ? realVideos : videoCache)].sort(() => 0.5 - Math.random());
-    res.render('index', { videos: shuffled });
+    const sort = ['views', 'rating'].includes(req.query.sort) ? req.query.sort : 'latest';
+    const videos = [...(realVideos.length ? realVideos : videoCache)].sort((a, b) => {
+        const number = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+        const date = value => Date.parse(String(value || '').replace(' ', 'T')) || 0;
+        const score = sort === 'views' ? number(b.views) - number(a.views)
+            : sort === 'rating' ? number(b.rating) - number(a.rating)
+            : date(b.date) - date(a.date);
+        return score || String(a.id).localeCompare(String(b.id));
+    });
+    res.render('index', { videos, sort });
+});
+
+app.get('/lankar', (req, res) => {
+    res.render('links', { links });
 });
 
 app.get('/video/:id', async (req, res) => {

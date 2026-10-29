@@ -12,11 +12,12 @@
 <body>
     <header>
         <div class="header-container">
-            <h1 class="logo">GRATIS <span>EROTIK</span></h1>
-            <nav>
+            <h1 class="logo"><a href="/">GRATIS <span>EROTIK</span></a></h1>
+            <nav aria-label="Huvudmeny">
                 <a href="/"><i class="fas fa-home"></i> Hem</a>
-                <a href="#"><i class="fas fa-fire"></i> Trendande</a>
-                <a href="#"><i class="fas fa-star"></i> Premium</a>
+                <a href="/#filmer"><i class="fas fa-play"></i> Filmer</a>
+                <a href="/lankar"><i class="fas fa-link"></i> Länkar</a>
+                <a href="/secret-admin-panel-777" rel="nofollow"><i class="fas fa-lock"></i> Admin</a>
             </nav>
         </div>
     </header>
@@ -24,18 +25,18 @@
     <div class="hero">
         <h2>Hitta dina favoritfilmer helt gratis</h2>
         <p>Senaste filmerna från våra källor.</p>
+        <a class="hero-link" href="#filmer">Se filmerna</a>
     </div>
 
-    <main>
-        <div class="category-bar">
-            <span class="cat-tag active">Alla</span>
-            <span class="cat-tag">Amatörer</span>
-            <span class="cat-tag">Professionella</span>
-            <span class="cat-tag">Heta</span>
-            <span class="cat-tag">Snabba</span>
+    <main id="filmer">
+        <div class="category-bar" aria-label="Sortera filmer">
+            <a class="cat-tag <%= sort === 'latest' ? 'active' : '' %>" href="/?sort=latest#filmer" <%- sort === 'latest' ? 'aria-current="page"' : '' %>>Senaste</a>
+            <a class="cat-tag <%= sort === 'views' ? 'active' : '' %>" href="/?sort=views#filmer" <%- sort === 'views' ? 'aria-current="page"' : '' %>>Mest sedda</a>
+            <a class="cat-tag <%= sort === 'rating' ? 'active' : '' %>" href="/?sort=rating#filmer" <%- sort === 'rating' ? 'aria-current="page"' : '' %>>Högst betyg</a>
         </div>
 
         <div class="video-grid">
+            <% if (!videos.length) { %><p class="empty-state">Inga filmer finns att visa ännu.</p><% } %>
             <% videos.forEach(video => { %>
                 <div class="video-card">
                     <a href="/video/<%= video.id %>">
@@ -59,13 +60,12 @@
     <footer>
         <div class="footer-content">
             <div class="footer-links">
-                <a href="#">Om oss</a>
-                <a href="#">Kontakt</a>
-                <a href="#">Villkor</a>
-                <a href="#">Integritetspolicy</a>
-                <a href="#">DMCA</a>
+                <a href="/">Hem</a>
+                <a href="/#filmer">Filmer</a>
+                <a href="/lankar">Länkar</a>
+                <a href="/secret-admin-panel-777" rel="nofollow">Admin</a>
             </div>
-            <p>&copy; 2024 Gratis Erotik - Den ultimata destinationen för gratis nöjen.</p>
+            <p>&copy; <%= new Date().getFullYear() %> Gratis Erotik.</p>
         </div>
     </footer>
 </body>
