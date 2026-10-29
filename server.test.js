@@ -42,8 +42,8 @@ test('renders imported metadata and the Pornhub embed URL', async () => {
     };
     const site = siteForHost('snusk.eu');
     const ads = { top: { enabled: false }, bottom: { enabled: false } };
-    const home = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { ...paginate([video], 1), sort: 'latest', site, ads });
-    const detail = await ejs.renderFile(path.join(__dirname, 'views/video.ejs'), { video, related: [], site, ads });
+    const home = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { ...paginate([video], 1), sort: 'latest', site, ads, categories: [], selectedCategory: '', categorySuffix: '' });
+    const detail = await ejs.renderFile(path.join(__dirname, 'views/video.ejs'), { video, related: [], site, ads, videoCategories: [] });
     assert.match(home, /11:26/);
     assert.match(home, /3\s?362/);
     assert.match(home, /90,9%/);
@@ -53,7 +53,7 @@ test('renders imported metadata and the Pornhub embed URL', async () => {
     assert.doesNotMatch(home, /05:20/);
     assert.match(home, /Snusk - Filmer/);
     const themedSite = siteWithSettings(site, { theme: 'forest', accent: '#123abc', saved: true });
-    const themedHome = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { ...paginate([video], 1), sort: 'latest', site: themedSite, ads });
+    const themedHome = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { ...paginate([video], 1), sort: 'latest', site: themedSite, ads, categories: [], selectedCategory: '', categorySuffix: '' });
     assert.match(themedHome, /class="site-theme-forest" style="--accent: #123abc"/);
 });
 
@@ -77,5 +77,19 @@ test('public pages use the requested domain name', async () => {
     } finally {
         await new Promise(resolve => server.close(resolve));
     }
+});
+
+test('category links keep the active filter when films span multiple pages', async () => {
+    const site = siteForHost('gratis-erotik.se');
+    const ads = { top: { enabled: false }, bottom: { enabled: false } };
+    const categories = [{ slug: 'amateur', label: 'Amateur', count: 101 }];
+    const videos = Array.from({ length: 101 }, (_, index) => ({ id: `film-${index}`, title: `Film ${index}`, thumbnail: 'https://example.com/thumb.jpg' }));
+    const home = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), {
+        ...paginate(videos, 1), sort: 'latest', site, ads, categories, selectedCategory: 'amateur', categorySuffix: '&category=amateur'
+    });
+    const directory = await ejs.renderFile(path.join(__dirname, 'views/categories.ejs'), { site, ads, categories });
+    assert.match(home, /sort=latest&amp;category=amateur&amp;page=2#filmer/);
+    assert.match(directory, /\?category=amateur#filmer/);
+    assert.match(directory, /101 filmer/);
 });
 

@@ -16,7 +16,7 @@
             </form>
         </div>
 
-        <% if (typeof added !== 'undefined') { %><p>Import klar: <%= added %> nya filmer.</p><% } %>
+        <% if (typeof added !== 'undefined') { %><p>Import klar: <%= added %> nya filmer, <%= enriched || 0 %> befintliga filmer fick kategorier.</p><% } %>
         <% if (typeof saved !== 'undefined' && saved) { %><p class="admin-notice">Inställningarna har sparats.</p><% } %>
         <% if (typeof adsSaved !== 'undefined' && adsSaved) { %><p class="admin-notice">Annonserna har publicerats på den här sajten.</p><% } %>
         <% if (error) { %><p class="admin-alert" role="alert"><%= error %></p><% } %>

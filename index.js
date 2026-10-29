@@ -11,6 +11,7 @@ const { readSettings, writeSettings, THEMES } = require('./admin-settings');
 const { suggest } = require('./admin-ai');
 const { readAds, writeAds } = require('./ad-settings');
 const { paginate } = require('./pagination');
+const { normalizeCategories, categoryCounts } = require('./categories');
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -110,8 +111,14 @@ app.post('/install', sameOrigin, async (req, res, next) => {
 app.get('/', async (req, res) => {
     await loadVideos();
     const realVideos = videoCache.filter(v => v.source !== 'Automated');
+    const catalog = realVideos.length ? realVideos : videoCache;
+    const categories = categoryCounts(catalog);
+    const requestedCategory = typeof req.query.category === 'string' ? req.query.category : '';
+    const selectedCategory = categories.some(item => item.slug === requestedCategory) ? requestedCategory : '';
+    const categorySuffix = selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : '';
     const sort = ['views', 'rating'].includes(req.query.sort) ? req.query.sort : 'latest';
-    const videos = [...(realVideos.length ? realVideos : videoCache)].sort((a, b) => {
+    const filtered = selectedCategory ? catalog.filter(v => normalizeCategories(v.categories).includes(selectedCategory)) : catalog;
+    const videos = [...filtered].sort((a, b) => {
         const number = value => Number.isFinite(Number(value)) ? Number(value) : 0;
         const date = value => Date.parse(String(value || '').replace(' ', 'T')) || 0;
         const score = sort === 'views' ? number(b.views) - number(a.views)
@@ -120,7 +127,13 @@ app.get('/', async (req, res) => {
         return score || String(a.id).localeCompare(String(b.id));
     });
     const page = paginate(videos, req.query.page);
-    res.render('index', { ...page, sort });
+    res.render('index', { ...page, sort, categories, selectedCategory, categorySuffix });
+});
+
+app.get('/kategorier', async (req, res) => {
+    await loadVideos();
+    const realVideos = videoCache.filter(v => v.source !== 'Automated');
+    res.render('categories', { categories: categoryCounts(realVideos.length ? realVideos : videoCache) });
 });
 
 app.get('/lankar', (req, res) => {
@@ -139,7 +152,7 @@ app.get('/video/:id', async (req, res) => {
         .sort(() => 0.5 - Math.random())
         .slice(0, 6);
 
-    res.render('video', { video, related });
+    res.render('video', { video, related, videoCategories: normalizeCategories(video.categories) });
 });
 
 // Secret Admin Panel
@@ -147,7 +160,8 @@ app.get('/secret-admin-panel-777', async (req, res) => {
     await loadVideos();
     const settings = await readSettings();
     const added = /^\d+$/.test(req.query.added || '') ? Number(req.query.added) : undefined;
-    res.render('admin', { videos: videoCache, added, saved: req.query.saved === '1', adsSaved: req.query.adsSaved === '1', settings, themes: THEMES, suggestion: null, error: null });
+    const enriched = /^\d+$/.test(req.query.enriched || '') ? Number(req.query.enriched) : 0;
+    res.render('admin', { videos: videoCache, added, enriched, saved: req.query.saved === '1', adsSaved: req.query.adsSaved === '1', settings, themes: THEMES, suggestion: null, error: null });
 });
 
 app.post('/admin/ads', async (req, res) => {
@@ -202,7 +216,7 @@ app.post('/admin/force-import', async (req, res) => {
         const settings = await readSettings();
         const result = await importVideos(settings.saved ? { pages: settings.importPages, search: settings.importSearch } : undefined);
         await loadVideos(); // Refresh cache
-        res.redirect(`/secret-admin-panel-777?added=${result.added}`);
+        res.redirect(`/secret-admin-panel-777?added=${result.added}&enriched=${result.enriched}`);
     } catch (e) {
         res.status(500).send('Import failed: ' + e.message);
     }

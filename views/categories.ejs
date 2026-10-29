@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Bläddra bland filmkategorier från videokällan.">
+    <title>Kategorier - <%= site.name %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="site-theme-<%= site.theme || 'midnight' %>" style="--accent: <%= site.accent %>">
+    <header>
+        <div class="header-container">
+            <h1 class="logo"><a href="/"><%= site.name %></a></h1>
+            <nav aria-label="Huvudmeny">
+                <a href="/"><i class="fas fa-home"></i> Hem</a>
+                <a href="/#filmer"><i class="fas fa-play"></i> Filmer</a>
+                <a href="/kategorier" aria-current="page"><i class="fas fa-layer-group"></i> Kategorier</a>
+                <a href="/lankar"><i class="fas fa-link"></i> Länkar</a>
+            </nav>
+        </div>
+    </header>
+
+    <%- include('partials/ad-top') %>
+
+    <main class="links-page">
+        <div class="links-intro">
+            <h2>Kategorier</h2>
+            <p>Kategorierna kommer från filmernas metadata och visas när de finns i katalogen.</p>
+        </div>
+        <% if (!categories.length) { %><p class="empty-state">Inga kategorier finns ännu. De visas efter nästa import med kategoridata.</p><% } %>
+        <div class="links-grid">
+            <% categories.forEach(category => { %>
+                <a class="link-card" href="/?category=<%= category.slug %>#filmer">
+                    <strong><%= category.label %></strong>
+                    <span><%= category.count %> <%= category.count === 1 ? 'film' : 'filmer' %> →</span>
+                </a>
+            <% }) %>
+        </div>
+    </main>
+
+    <%- include('partials/ad-bottom') %>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="/">Hem</a>
+                <a href="/#filmer">Filmer</a>
+                <a href="/kategorier">Kategorier</a>
+                <a href="/lankar">Länkar</a>
+            </div>
+            <p>&copy; <%= new Date().getFullYear() %> <%= site.name %>.</p>
+        </div>
+    </footer>
+</body>
+</html>
