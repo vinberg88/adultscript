@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Pornhub",
+    "url": "https://www.pornhub.com/video/webmasterss",
+    "selectors": {
+      "item": ".video-item, .video-card, .video-thumb",
+      "title": ".title, .video-title",
+      "link": "a.title, a.video-link",
+      "thumb": "img.thumb, img.video-thumbnail"
+    }
+  },
+  {
+    "name": "eVideos",
+    "url": "https://evideos.com",
+    "selectors": {
+      "item": ".video-item, .video-card",
+      "title": ".title, .video-title",
+      "link": "a",
+      "thumb": "img"
+    }
+  },
+  {
+    "name": "Snusk.eu",
+    "url": "https://snusk.eu",
+    "selectors": {
+      "item": ".video-item, .video-card",
+      "title": ".title",
+      "link": "a",
+      "thumb": "img"
+    }
+  }
+]
