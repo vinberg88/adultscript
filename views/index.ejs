@@ -21,7 +21,12 @@
                 <div class="video-card">
                     <a href="/video/<%= video.id %>">
                         <img src="<%= video.thumbnail %>" alt="<%= video.title %>">
-                        <p><%= video.title %></p>
+                        <div class="card-info">
+                            <p><%= video.title %></p>
+                            <div class="card-stats">
+                                <span class="stat"><i class="far fa-thumbs-up"></i> 👍 <%= Math.floor(Math.random() * 1000) + 100 %></span>
+                            </div>
+                        </div>
                     </a>
                 </div>
             <% }) %>
