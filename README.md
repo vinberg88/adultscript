@@ -1,5 +1,7 @@
 # AdultScript - Sök bland filmerna =)
 
+<img width="700" height="380" alt="57687c" src="https://github.com/user-attachments/assets/16c183d9-c309-47cb-b862-36d31a82a30a" />
+
 Node.js videoportal för cPanel. Importören hämtar metadata från Pornhubs Webmasters API och visar filmer med Pornhubs inbäddade spelare. Den laddar inte ned eller lagrar videofiler.
 
 ## Installation i cPanel
