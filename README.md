@@ -30,7 +30,7 @@ Vill du i stället välja adminuppgifter på en installationssida, sätt en unik
 
 ## Reklamplatser
 
-De publika sidorna har två stora reklamplatser: en under sidhuvudet eller startsidans introduktion och en före sidfoten. Båda är märkta **Annons** och visar en platshållare tills annonskod har lagts till. Övre och nedre annonsen kan ändras var för sig i `views/partials/ad-top.ejs` respektive `views/partials/ad-bottom.ejs`. Mallarna används av startsidan, videosidan och länksidan. Lägg aldrig in privata nycklar eller lösenord i annonskoden.
+De publika sidorna har två stora reklamplatser: en under sidhuvudet eller startsidans introduktion och en före sidfoten. Båda är märkta **Annons** och visar en platshållare tills de aktiveras. Öppna `/secret-admin-panel-777`, fyll i **Reklam** med bildadress och klickadress för övre och nedre banner och välj **Publicera annonser**. Bilderna ska ha publika HTTPS-adresser. Varje app sparar sina annonser separat i `data/ads.json`; en ändring syns direkt utan Redeploy. Filen är inte med i Git. Vid första uppsättningen kan cPanels App Env användas med `AD_TOP_IMAGE_URL`, `AD_TOP_TARGET_URL`, `AD_BOTTOM_IMAGE_URL` och `AD_BOTTOM_TARGET_URL`; de gäller tills annonser sparas i admin. Kontrollera att cPanel bevarar `data/` när du senare kör Redeploy.
 
 ## GitHub-repo
 

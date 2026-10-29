@@ -40,8 +40,9 @@ test('renders imported metadata and the Pornhub embed URL', async () => {
         thumbnail: 'https://example.com/thumb.jpg', duration: '11:26', views: 3362, rating: 80
     };
     const site = siteForHost('snusk.eu');
-    const home = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { videos: [video], sort: 'latest', site });
-    const detail = await ejs.renderFile(path.join(__dirname, 'views/video.ejs'), { video, related: [], site });
+    const ads = { top: { enabled: false }, bottom: { enabled: false } };
+    const home = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { videos: [video], sort: 'latest', site, ads });
+    const detail = await ejs.renderFile(path.join(__dirname, 'views/video.ejs'), { video, related: [], site, ads });
     assert.match(home, /11:26/);
     assert.match(home, /3\s?362/);
     assert.match(detail, /https:\/\/www\.pornhub\.com\/embed\/abc123/);

@@ -9,6 +9,7 @@ const links = require('./links.json');
 const { siteForHost } = require('./site-profile');
 const { readSettings, writeSettings, THEMES } = require('./admin-settings');
 const { suggest } = require('./admin-ai');
+const { readAds, writeAds } = require('./ad-settings');
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -20,6 +21,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.use((req, res, next) => {
     res.locals.site = siteForHost(req.get('host'));
     next();
+});
+app.use(async (req, res, next) => {
+    try { res.locals.ads = await readAds(); next(); } catch (error) { next(error); }
 });
 
 function installerEnabled() {
@@ -135,7 +139,20 @@ app.get('/secret-admin-panel-777', async (req, res) => {
     await loadVideos();
     const settings = await readSettings();
     const added = /^\d+$/.test(req.query.added || '') ? Number(req.query.added) : undefined;
-    res.render('admin', { videos: videoCache, added, saved: req.query.saved === '1', settings, themes: THEMES, suggestion: null, error: null });
+    res.render('admin', { videos: videoCache, added, saved: req.query.saved === '1', adsSaved: req.query.adsSaved === '1', settings, themes: THEMES, suggestion: null, error: null });
+});
+
+app.post('/admin/ads', async (req, res) => {
+    try {
+        await writeAds({
+            top: { imageUrl: req.body.topImageUrl, targetUrl: req.body.topTargetUrl, alt: req.body.topAlt, enabled: req.body.topEnabled },
+            bottom: { imageUrl: req.body.bottomImageUrl, targetUrl: req.body.bottomTargetUrl, alt: req.body.bottomAlt, enabled: req.body.bottomEnabled }
+        });
+        res.redirect('/secret-admin-panel-777?adsSaved=1');
+    } catch (error) {
+        await loadVideos();
+        res.status(400).render('admin', { videos: videoCache, added: undefined, adsSaved: false, settings: await readSettings(), themes: THEMES, suggestion: null, error: error.message });
+    }
 });
 
 app.post('/admin/settings', async (req, res) => {

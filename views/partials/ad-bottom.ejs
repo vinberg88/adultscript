@@ -1,4 +1,10 @@
 <aside class="ad-banner" aria-label="Annons" data-ad-position="bottom">
     <span class="ad-banner-label">Annons</span>
-    <div class="ad-banner-content">Reklamplats</div>
+    <div class="ad-banner-content">
+        <% if (ads.bottom.enabled) { %>
+            <% if (ads.bottom.targetUrl) { %><a class="ad-banner-link" href="<%= ads.bottom.targetUrl %>" target="_blank" rel="sponsored noopener noreferrer"><% } %>
+                <img class="ad-banner-image" src="<%= ads.bottom.imageUrl %>" alt="<%= ads.bottom.alt || 'Annons' %>" loading="lazy" referrerpolicy="no-referrer">
+            <% if (ads.bottom.targetUrl) { %></a><% } %>
+        <% } else { %>Reklamplats<% } %>
+    </div>
 </aside>

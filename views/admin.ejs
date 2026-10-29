@@ -18,6 +18,7 @@
 
         <% if (typeof added !== 'undefined') { %><p>Import klar: <%= added %> nya filmer.</p><% } %>
         <% if (typeof saved !== 'undefined' && saved) { %><p class="admin-notice">Inställningarna har sparats.</p><% } %>
+        <% if (typeof adsSaved !== 'undefined' && adsSaved) { %><p class="admin-notice">Annonserna har publicerats på den här sajten.</p><% } %>
         <% if (error) { %><p class="admin-alert" role="alert"><%= error %></p><% } %>
         <% if (suggestion) { %><section class="admin-card"><h2>AI-förslag för granskning</h2><p class="admin-suggestion"><%= suggestion %></p><p>Inget har sparats eller publicerats.</p></section><% } %>
 
@@ -37,6 +38,24 @@
                 <button type="submit" class="btn-success">Spara inställningar</button>
             </form>
             <p>Manuell import med knappen ovan fungerar även om automatisk import är avstängd.</p>
+        </section>
+
+        <section class="admin-card" id="annonser">
+            <h2>Reklam på <%= site.domain %></h2>
+            <p>Varje sajt har egna annonser. Klistra in bildens HTTPS-adress och den sida som ska öppnas vid klick. Ändringar syns direkt utan Redeploy.</p>
+            <form action="/admin/ads" method="POST" class="admin-ads-form">
+                <% [['top', 'Övre banner'], ['bottom', 'Nedre banner']].forEach(([position, title]) => { const ad = ads[position]; %>
+                    <fieldset class="admin-ad-slot">
+                        <legend><%= title %></legend>
+                        <label class="admin-check"><input name="<%= position %>Enabled" type="checkbox" <%= ad.enabled ? 'checked' : '' %>> Visa annonsen</label>
+                        <label>Bildadress (HTTPS)<input name="<%= position %>ImageUrl" type="url" inputmode="url" placeholder="https://…/banner.webp" value="<%= ad.imageUrl %>"></label>
+                        <label>Klickadress (HTTPS)<input name="<%= position %>TargetUrl" type="url" inputmode="url" placeholder="https://…" value="<%= ad.targetUrl %>"></label>
+                        <label>Bildbeskrivning<input name="<%= position %>Alt" maxlength="120" placeholder="Beskriv annonsen kort" value="<%= ad.alt %>"></label>
+                        <% if (ad.imageUrl) { %><div class="admin-ad-preview"><img src="<%= ad.imageUrl %>" alt="<%= ad.alt || title %>" referrerpolicy="no-referrer"></div><% } %>
+                    </fieldset>
+                <% }) %>
+                <button type="submit" class="btn-success">Publicera annonser</button>
+            </form>
         </section>
 
         <section class="admin-card">

@@ -85,6 +85,8 @@ a:focus-visible { outline: 2px solid var(--accent, #ff9900); outline-offset: 4px
     min-height: 120px;
     font-size: 1rem;
 }
+.ad-banner-link { display: block; width: 100%; text-align: center; }
+.ad-banner-image { display: block; width: auto; max-width: 100%; height: auto; max-height: 360px; margin: auto; object-fit: contain; }
 
 /* Category Bar */
 .category-bar {
@@ -283,6 +285,13 @@ footer p { color: #555; font-size: 0.8rem; }
 .admin-settings-form input[type=color] { width: 80px; padding: 2px; }
 .admin-settings-form .admin-check { display: flex; align-items: center; }
 .admin-settings-form .admin-check input { min-height: auto; }
+.admin-ads-form { display: grid; gap: 18px; }
+.admin-ad-slot { display: grid; gap: 12px; min-width: 0; border: 1px solid var(--admin-muted); border-radius: 10px; padding: 16px; }
+.admin-ad-slot legend { padding: 0 6px; color: var(--admin-accent); font-weight: 700; }
+.admin-ad-slot label { display: grid; gap: 6px; font-weight: 600; }
+.admin-ad-slot input[type=url], .admin-ad-slot input[type=text] { min-height: 42px; padding: 8px; border-radius: 7px; border: 1px solid var(--admin-muted); background: var(--admin-bg); color: var(--admin-text); font: inherit; }
+.admin-ad-slot .admin-check { display: flex; align-items: center; gap: 9px; }
+.admin-ad-preview img { display: block; max-width: 100%; max-height: 260px; height: auto; border-radius: 8px; }
 .admin-ai-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .admin-suggestion { white-space: pre-wrap; line-height: 1.5; }
 .admin-alert { padding: 12px; border-radius: 8px; background: #743044; color: #fff; }
