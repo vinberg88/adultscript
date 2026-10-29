@@ -20,7 +20,8 @@ async function importVideos() {
         const currentVideos = await fs.readJson(DATA_FILE);
         const existingUrls = new Set(currentVideos.map(v => v.url));
 
-        // Selector for video items on Pornhub (approximate)
+        // Selector for video items on Pornhub
+        $('.video-item, .video-card, .video-thumb').each((i, elem) => {
             const title = $(elem).find('.title').text().trim() || 'Snygg Video';
             const url = $(elem).find('a').attr('href');
             const thumbnail = $(elem).find('img').attr('src');
@@ -39,6 +40,7 @@ async function importVideos() {
                     importedAt: new Date().toISOString()
                 });
             }
+        });
         }
 
         // If scraping didn't find enough, fill with some generated content to maintain the "500/day" feel
