@@ -60,7 +60,10 @@ cron.schedule('0 0 * * *', () => {
 });
 
 // Also run once on startup to ensure we have content
-importVideos();
+// Wrapped in a try-catch block to prevent app from crashing on startup if import fails
+importVideos().catch(err => {
+  console.error('Startup import failed, but app will continue to run:', err);
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
