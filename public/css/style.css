@@ -12,47 +12,32 @@ header {
     justify-content: space-between;
     align-items: center;
     border-bottom: 3px solid #ff9900;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
 }
-header h1 {
+header .logo {
     color: #ff9900;
     margin: 0;
     font-size: 1.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-weight: bold;
 }
 nav a {
     color: #fff;
     text-decoration: none;
     font-weight: bold;
-    padding: 5px 10px;
-    border: 1px solid #ff9900;
-    border-radius: 4px;
-    transition: 0.3s;
-}
-nav a:hover {
-    background-color: #ff9900;
-    color: #000;
 }
 .video-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 25px;
-    padding: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
 }
 .video-card {
-    background-color: #222;
-    border-radius: 12px;
+    background-color: #333;
+    border-radius: 8px;
     overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
-    border: 1px solid #333;
+    transition: transform 0.2s;
 }
 .video-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-    border-color: #ff9900;
+    transform: scale(1.05);
 }
 .video-card a {
     text-decoration: none;
@@ -60,8 +45,6 @@ nav a:hover {
 }
 .video-card img {
     width: 100%;
-    aspect-ratio: 16/9;
-    object-fit: cover;
     display: block;
 }
 .video-card p {
@@ -87,6 +70,39 @@ nav a:hover {
     align-items: center;
     gap: 5px;
 }
+.video-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 20px;
+    text-align: center;
+}
+.video-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.embed-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+    background: #000;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+}
+.embed-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+video {
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+    background: #000;
+}
 .video-actions {
     display: flex;
     justify-content: center;
@@ -107,20 +123,6 @@ nav a:hover {
     background: #ff9900;
     color: #000;
     border-color: #ff9900;
-}
-.video-container {
-    max-width: 1000px;
-    margin: 40px auto;
-    padding: 0 20px;
-}
-.video-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-video {
-    border-radius: 12px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.7);
-    background: #000;
 }
 footer {
     background-color: #000;
