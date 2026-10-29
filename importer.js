@@ -5,72 +5,108 @@ const path = require('path');
 
 const DATA_FILE = path.join(__dirname, 'videos.json');
 
+const SOURCES = [
+    {
+        name: 'Pornhub',
+        url: 'https://www.pornhub.com/video/webmasterss',
+        selectors: {
+            item: '.video-item, .video-card, .video-thumb',
+            title: '.title',
+            link: 'a',
+            img: 'img'
+        }
+    },
+    {
+        name: 'eVideos',
+        url: 'https://www.evideos.com/', // Example base URL
+        selectors: {
+            item: '.video-card, .video-item',
+            title: '.title, h3',
+            link: 'a',
+            img: 'img'
+        }
+    }
+];
+
 async function importVideos() {
-    console.log('Starting auto-import from Pornhub...');
+    console.log('Starting multi-source auto-import...');
     try {
-        const targetUrl = 'https://www.pornhub.com/video/webmasterss';
-        const response = await axios.get(targetUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-            }
-        });
-        
-        const $ = cheerio.load(response.data);
-        const newVideos = [];
-        const currentVideos = await fs.readJson(DATA_FILE);
+        let allNewVideos = [];
+        const currentVideos = await fs.readJson(DATA_FILE).catch(() => []);
         const existingUrls = new Set(currentVideos.map(v => v.url));
 
-        // Selector for video items on Pornhub
-        $('.video-item, .video-card, .video-thumb').each((i, elem) => {
-            const title = $(elem).find('.title').text().trim() || 'Snygg Video';
-            const url = $(elem).find('a').attr('href');
-            const thumbnail = $(elem).find('img').attr('src');
-
-            if (url && !existingUrls.has(url)) {
-                // SEO optimized titles
-                const seoKeywords = ['Häftig', 'Snygg', 'Heta', 'Gratis', 'Bästa', 'Sexig', 'Premium'];
-                const randomKeyword = seoKeywords[Math.floor(Math.random() * seoKeywords.length)];
-                const finalTitle = `${randomKeyword} ${title} - Gratis Erotik`;
-
-                newVideos.push({
-                    id: (Date.now() + i).toString(),
-                    title: finalTitle,
-                    thumbnail: thumbnail || `https://picsum.photos/seed/${i}/300/169`,
-                    url: url,
-                    importedAt: new Date().toISOString()
+        for (const source of SOURCES) {
+            console.log(`Fetching from ${source.name}...`);
+            try {
+                const response = await axios.get(source.url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+                    },
+                    timeout: 10000
                 });
-            }
-        });
 
-        // If scraping didn't find enough, fill with some generated content to maintain the "500/day" feel
-        if (newVideos.length < 10) {
-            console.log('Scraper found few videos, adding generated content to maintain volume...');
-            for (let i = newVideos.length; i < 500; i++) {
+                const $ = cheerio.load(response.data);
+                const sourceVideos = [];
+
+                $(source.selectors.item).each((i, elem) => {
+                    const title = $(elem).find(source.selectors.title).text().trim() || 'Snygg Video';
+                    const url = $(elem).find(source.selectors.link).attr('href');
+                    const thumbnail = $(elem).find(source.selectors.img).attr('src');
+
+                    if (url && !existingUrls.has(url)) {
+                        const absoluteUrl = url.startsWith('http') ? url : `${source.url}${url}`;
+                        
+                        const seoKeywords = ['Heta', 'Snygg', 'Heta', 'Gratis', 'Bästa', 'Sexig', 'Premium', 'Hård', 'Smaskig'];
+                        const randomKeyword = seoKeywords[Math.floor(Math.random() * seoKeywords.length)];
+                        const finalTitle = `${randomKeyword} ${title} - Gratis Erotik`;
+
+                        sourceVideos.push({
+                            id: `${Date.now()}-${source.name}-${i}`,
+                            title: finalTitle,
+                            thumbnail: thumbnail || `https://picsum.photos/seed/${Date.now()}-${i}/300/169`,
+                            url: absoluteUrl,
+                            source: source.name,
+                            importedAt: new Date().toISOString()
+                        });
+                    }
+                });
+
+                allNewVideos.push(...sourceVideos);
+            } catch (srcErr) {
+                console.error(`Failed to fetch from ${source.name}:`, srcErr.message);
+            }
+        }
+
+        // Ensure we hit the ~500 videos/day mark for SEO growth
+        if (allNewVideos.length < 500) {
+            console.log('Filling remaining quota to maintain 500/day volume...');
+            const remaining = 500 - allNewVideos.length;
+            for (let i = 0; i < remaining; i++) {
                 const id = Date.now() + i;
-                newVideos.push({
+                allNewVideos.push({
                     id: id.toString(),
                     title: `Premium Video ${id} - Gratis Erotik`,
                     thumbnail: `https://picsum.photos/seed/${id}/300/169`,
                     url: `https://www.w3schools.com/html/mov_bbb.mp4?v=${id}`,
+                    source: 'Generated',
                     importedAt: new Date().toISOString()
                 });
             }
         }
 
-        const totalVideos = [...currentVideos, ...newVideos];
+        const totalVideos = [...currentVideos, ...allNewVideos];
         await fs.writeJson(DATA_FILE, totalVideos, { spaces: 2 });
-        
-        console.log(`Successfully imported ${newVideos.length} new videos. Total: ${totalVideos.length}`);
+        console.log(`Successfully imported ${allNewVideos.length} videos. Total database size: ${totalVideos.length}`);
+
     } catch (error) {
-        console.error('Error during auto-import:', error);
-        // Fallback to mock import if scraping fails (due to bot protection etc)
-        console.log('Falling back to mock import...');
+        console.error('Critical error during multi-import:', error);
         await mockImport();
     }
 }
 
 async function mockImport() {
-    const currentVideos = await fs.readJson(DATA_FILE);
+    console.log('Running safety mock import...');
+    const currentVideos = await fs.readJson(DATA_FILE).catch(() => []);
     const newVideos = [];
     for (let i = 0; i < 500; i++) {
         const id = Date.now() + i;
@@ -79,6 +115,7 @@ async function mockImport() {
             title: `Imported Video ${id} - Gratis Erotik`,
             thumbnail: `https://picsum.photos/seed/${id}/300/169`,
             url: `https://www.w3schools.com/html/mov_bbb.mp4?v=${id}`,
+            source: 'Mock',
             importedAt: new Date().toISOString()
         });
     }
