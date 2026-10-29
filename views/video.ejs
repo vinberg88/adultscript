@@ -17,10 +17,18 @@
     <main>
         <div class="video-container">
             <h2><%= video.title %></h2>
-            <video controls width="100%">
-                <source src="<%= video.url %>" type="video/mp4">
-                Din webbläsare stöder inte videospelaren.
-            </video>
+            
+            <% if (video.url.includes('pornhub.com') || video.url.includes('evideos.com') || !video.url.endsWith('.mp4')) { %>
+                <div class="embed-container">
+                    <iframe src="<%= video.url %>" frameborder="0" allowfullscreen></iframe>
+                </div>
+            <% } else { %>
+                <video controls width="100%">
+                    <source src="<%= video.url %>" type="video/mp4">
+                    Din webbläsare stöder inte videospelaren.
+                </video>
+            <% } %>
+
             <div class="video-actions">
                 <button class="like-btn">👍 <%= Math.floor(Math.random() * 1000) + 100 %></button>
                 <button class="share-btn">Dela</button>
