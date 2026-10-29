@@ -57,6 +57,35 @@ a:focus-visible { outline: 2px solid #ff9900; outline-offset: 4px; }
 .hero-link:hover { background: #ffb03b; }
 #filmer { scroll-margin-top: 85px; }
 
+/* Advertising banners */
+.ad-banner {
+    box-sizing: border-box;
+    width: min(1200px, calc(100% - 40px));
+    min-height: 180px;
+    margin: 28px auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border: 1px dashed #555;
+    border-radius: 12px;
+    background: #171717;
+    color: #aaa;
+}
+.ad-banner-label {
+    align-self: flex-start;
+    font-size: .75rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.ad-banner-content {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    min-height: 120px;
+    font-size: 1rem;
+}
+
 /* Category Bar */
 .category-bar {
     display: flex;
@@ -252,6 +281,10 @@ footer p { color: #555; font-size: 0.8rem; }
     .header-container { flex-direction: column; gap: 10px; }
     nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; }
     nav a { margin-left: 0; }
+}
+@media (max-width: 600px) {
+    .ad-banner { width: calc(100% - 24px); min-height: 130px; margin: 20px auto; }
+    .ad-banner-content { min-height: 76px; }
 }
 /* One-time installer */
 .install-page { min-height: 100vh; display: grid; place-items: center; padding: 28px 16px; background: #101014; color: #f5f5f7; }

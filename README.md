@@ -15,17 +15,21 @@ Node.js videoportal för cPanel. Importören hämtar metadata från Pornhubs Web
 
 Installationssidan skriver bara `data/site.json` med en saltad hash av adminlösenordet och valen för importen. Den ändrar inte `videos.json`. Första importen börjar efter installationen och därefter vid midnatt enligt serverns tidszon. Befintliga poster sparas; nya Pornhub-poster läggs till utan dubbletter. Om API:t misslyckas lämnas filen orörd.
 
-Samma privata repo kan installeras på en ny domän i en **egen** cPanel-app: använd en ny appmapp, en ny `INSTALL_TOKEN` och öppna den nya domänens `/install`. Varje sajt får då egna adminuppgifter och egen `data/site.json`. En redan installerad sajt uppdateras med Redeploy; dess `/install` förblir låst och filmerna ska bevaras. Länksidan finns på `/lankar` och länkarna i `links.json` följer med nya installationer.
+Samma repo kan installeras på en ny domän i en **egen** cPanel-app: använd en ny appmapp, en ny `INSTALL_TOKEN` och öppna den nya domänens `/install`. Varje sajt får då egna adminuppgifter och egen `data/site.json`. En redan installerad sajt uppdateras med Redeploy; dess `/install` förblir låst och filmerna ska bevaras. Länksidan finns på `/lankar` och länkarna i `links.json` följer med nya installationer.
 
 För en befintlig sajt: kopiera `videos.json` till en plats utanför appmappen före uppdateringen. Spara även `data/site.json` efter installationen som del av din ordinarie säkerhetskopia. `data/site.json` hålls utanför Git; det befintliga `videos.json` är fortfarande en spårad fil och måste bevaras vid uppdateringar.
+
+## Reklamplatser
+
+De publika sidorna har två stora reklamplatser: en under sidhuvudet eller startsidans introduktion och en före sidfoten. Båda är märkta **Annons** och visar en platshållare tills annonskod har lagts till. Övre och nedre annonsen kan ändras var för sig i `views/partials/ad-top.ejs` respektive `views/partials/ad-bottom.ejs`. Mallarna används av startsidan, videosidan och länksidan. Lägg aldrig in privata nycklar eller lösenord i annonskoden.
 
 ## Alternativ utan webbinstaller
 
 Om `INSTALL_TOKEN` inte är satt fortsätter appen att fungera med `ADMIN_USER` (standard `admin`) och `ADMIN_PASSWORD` i cPanels miljövariabler. `PORN_HUB_IMPORT_PAGES` (1–5) och `PORN_HUB_SEARCH` styr importen tills webbinstallationen har sparat egna val.
 
-## Privat GitHub-repo
+## GitHub-repo
 
-Ge servern en separat SSH-nyckel och lägg endast den publika nyckeln som en skrivskyddad deploy key i repots inställningar. Den privata nyckeln stannar på servern. Spara aldrig `ADMIN_PASSWORD`, `INSTALL_TOKEN`, SSH-nycklar eller `.env` i repot.
+För det publika repot används `https://github.com/vinberg88/adultscript.git` i cPanel utan SSH-nyckel. Om repot senare blir privat igen behöver servern en separat SSH-nyckel; lägg då endast den publika delen som en skrivskyddad deploy key i GitHub. Spara aldrig `ADMIN_PASSWORD`, `INSTALL_TOKEN`, SSH-nycklar eller `.env` i repot.
 
 ## Tester
 

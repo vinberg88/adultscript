@@ -27,6 +27,8 @@
         <a class="hero-link" href="#filmer">Se filmerna</a>
     </div>
 
+    <%- include('partials/ad-top') %>
+
     <main id="filmer">
         <div class="category-bar" aria-label="Sortera filmer">
             <a class="cat-tag <%= sort === 'latest' ? 'active' : '' %>" href="/?sort=latest#filmer" <%- sort === 'latest' ? 'aria-current="page"' : '' %>>Senaste</a>
@@ -55,6 +57,8 @@
             <% }) %>
         </div>
     </main>
+
+    <%- include('partials/ad-bottom') %>
 
     <footer>
         <div class="footer-content">
