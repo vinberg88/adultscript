@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const ejs = require('ejs');
+const path = require('path');
 const { app } = require('./index');
 
 test('admin requires a password and rejects cross-site writes', async () => {
@@ -24,3 +26,19 @@ test('admin requires a password and rejects cross-site writes', async () => {
         else process.env.ADMIN_PASSWORD = previous;
     }
 });
+
+test('renders imported metadata and the Pornhub embed URL', async () => {
+    const video = {
+        id: 'pornhub-abc123', title: 'Example', source: 'Pornhub',
+        url: 'https://www.pornhub.com/view_video.php?viewkey=abc123',
+        embedUrl: 'https://www.pornhub.com/embed/abc123',
+        thumbnail: 'https://example.com/thumb.jpg', duration: '11:26', views: 3362, rating: 80
+    };
+    const home = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { videos: [video] });
+    const detail = await ejs.renderFile(path.join(__dirname, 'views/video.ejs'), { video, related: [] });
+    assert.match(home, /11:26/);
+    assert.match(home, /3\s?362/);
+    assert.match(detail, /https:\/\/www\.pornhub\.com\/embed\/abc123/);
+    assert.doesNotMatch(home, /05:20/);
+});
+
