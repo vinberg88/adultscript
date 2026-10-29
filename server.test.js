@@ -4,7 +4,7 @@ const ejs = require('ejs');
 const path = require('path');
 const http = require('http');
 const { app } = require('./index');
-const { siteForHost } = require('./site-profile');
+const { siteForHost, siteWithSettings } = require('./site-profile');
 const { paginate } = require('./pagination');
 
 test('admin requires a password and rejects cross-site writes', async () => {
@@ -52,6 +52,9 @@ test('renders imported metadata and the Pornhub embed URL', async () => {
     assert.match(detail, /https:\/\/www\.pornhub\.com\/embed\/abc123/);
     assert.doesNotMatch(home, /05:20/);
     assert.match(home, /Snusk - Filmer/);
+    const themedSite = siteWithSettings(site, { theme: 'forest', accent: '#123abc', saved: true });
+    const themedHome = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { ...paginate([video], 1), sort: 'latest', site: themedSite, ads });
+    assert.match(themedHome, /class="site-theme-forest" style="--accent: #123abc"/);
 });
 
 test('public pages use the requested domain name', async () => {

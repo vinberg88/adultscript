@@ -12,4 +12,8 @@ function siteForHost(host, env = process.env) {
     return { domain, name, accent };
 }
 
-module.exports = { siteForHost };
+function siteWithSettings(site, settings) {
+    return { ...site, theme: settings.theme, accent: settings.saved ? settings.accent : site.accent };
+}
+
+module.exports = { siteForHost, siteWithSettings };

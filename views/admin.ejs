@@ -25,12 +25,12 @@
         <section class="admin-card">
             <h2>Utseende och automatisk import</h2>
             <form action="/admin/settings" method="POST" class="admin-settings-form">
-                <label>Tema
+                <label>Tema för sajt och admin
                     <select name="theme">
                         <% themes.forEach(theme => { %><option value="<%= theme %>" <%= settings.theme === theme ? 'selected' : '' %>><%= {midnight:'Midnatt',ocean:'Hav',forest:'Skog',sunset:'Solnedgång'}[theme] %></option><% }) %>
                     </select>
                 </label>
-                <label>Accentfärg <input name="accent" type="color" value="<%= settings.accent %>"></label>
+                <label>Accentfärg för sajt och admin <input name="accent" type="color" value="<%= settings.accent %>"></label>
                 <label class="admin-check"><input name="autoImport" type="checkbox" <%= settings.autoImport ? 'checked' : '' %>> Automatisk import varje dag</label>
                 <label>Timme enligt serverns tidszon <input name="importHour" type="number" min="0" max="23" value="<%= settings.importHour %>"></label>
                 <label>Antal importsidor <input name="importPages" type="number" min="1" max="5" value="<%= settings.importPages %>"></label>

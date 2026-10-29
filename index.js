@@ -6,7 +6,7 @@ const { importVideos } = require('./importer');
 const { readSiteConfig, createSiteConfig, verifyAdminPassword, safeEqual } = require('./config');
 const { readVideos, writeVideos } = require('./video-store');
 const links = require('./links.json');
-const { siteForHost } = require('./site-profile');
+const { siteForHost, siteWithSettings } = require('./site-profile');
 const { readSettings, writeSettings, THEMES } = require('./admin-settings');
 const { suggest } = require('./admin-ai');
 const { readAds, writeAds } = require('./ad-settings');
@@ -19,8 +19,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use((req, res, next) => {
-    res.locals.site = siteForHost(req.get('host'));
+app.use(async (req, res, next) => {
+    const site = siteForHost(req.get('host'));
+    try {
+        res.locals.site = siteWithSettings(site, await readSettings());
+    } catch (error) {
+        console.error('Could not read site appearance, using domain defaults:', error);
+        res.locals.site = { ...site, theme: 'midnight' };
+    }
     next();
 });
 app.use(async (req, res, next) => {
