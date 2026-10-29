@@ -35,6 +35,7 @@
             <a class="cat-tag <%= sort === 'views' ? 'active' : '' %>" href="/?sort=views#filmer" <%- sort === 'views' ? 'aria-current="page"' : '' %>>Mest sedda</a>
             <a class="cat-tag <%= sort === 'rating' ? 'active' : '' %>" href="/?sort=rating#filmer" <%- sort === 'rating' ? 'aria-current="page"' : '' %>>Högst betyg</a>
         </div>
+        <% if (pagination.total) { %><p class="video-count">Visar <%= pagination.from.toLocaleString('sv-SE') %>–<%= pagination.to.toLocaleString('sv-SE') %> av <%= pagination.total.toLocaleString('sv-SE') %> filmer</p><% } %>
 
         <div class="video-grid">
             <% if (!videos.length) { %><p class="empty-state">Inga filmer finns att visa ännu.</p><% } %>
@@ -56,6 +57,15 @@
                 </div>
             <% }) %>
         </div>
+        <% if (pagination.totalPages > 1) { %>
+            <nav class="pagination" aria-label="Filmsidor">
+                <% if (pagination.page > 1) { %><a href="/?sort=<%= sort %>&page=<%= pagination.page - 1 %>#filmer" rel="prev">← Föregående</a><% } %>
+                <% pagination.pages.forEach(number => { %>
+                    <% if (number === null) { %><span class="pagination-gap" aria-hidden="true">…</span><% } else if (number === pagination.page) { %><span class="pagination-current" aria-current="page"><%= number %></span><% } else { %><a href="/?sort=<%= sort %>&page=<%= number %>#filmer"><%= number %></a><% } %>
+                <% }) %>
+                <% if (pagination.page < pagination.totalPages) { %><a href="/?sort=<%= sort %>&page=<%= pagination.page + 1 %>#filmer" rel="next">Nästa →</a><% } %>
+            </nav>
+        <% } %>
     </main>
 
     <%- include('partials/ad-bottom') %>

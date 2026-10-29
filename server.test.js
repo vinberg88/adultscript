@@ -5,6 +5,7 @@ const path = require('path');
 const http = require('http');
 const { app } = require('./index');
 const { siteForHost } = require('./site-profile');
+const { paginate } = require('./pagination');
 
 test('admin requires a password and rejects cross-site writes', async () => {
     const previous = process.env.ADMIN_PASSWORD;
@@ -41,7 +42,7 @@ test('renders imported metadata and the Pornhub embed URL', async () => {
     };
     const site = siteForHost('snusk.eu');
     const ads = { top: { enabled: false }, bottom: { enabled: false } };
-    const home = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { videos: [video], sort: 'latest', site, ads });
+    const home = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { ...paginate([video], 1), sort: 'latest', site, ads });
     const detail = await ejs.renderFile(path.join(__dirname, 'views/video.ejs'), { video, related: [], site, ads });
     assert.match(home, /11:26/);
     assert.match(home, /3\s?362/);

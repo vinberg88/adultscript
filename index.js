@@ -10,6 +10,7 @@ const { siteForHost } = require('./site-profile');
 const { readSettings, writeSettings, THEMES } = require('./admin-settings');
 const { suggest } = require('./admin-ai');
 const { readAds, writeAds } = require('./ad-settings');
+const { paginate } = require('./pagination');
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -112,7 +113,8 @@ app.get('/', async (req, res) => {
             : date(b.date) - date(a.date);
         return score || String(a.id).localeCompare(String(b.id));
     });
-    res.render('index', { videos, sort });
+    const page = paginate(videos, req.query.page);
+    res.render('index', { ...page, sort });
 });
 
 app.get('/lankar', (req, res) => {

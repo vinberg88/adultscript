@@ -6,6 +6,8 @@
 
 Node.js videoportal för cPanel. Importören hämtar metadata från Pornhubs Webmasters API och visar filmer med Pornhubs inbäddade spelare. Den laddar inte ned eller lagrar videofiler.
 
+Startsidan visar högst 100 filmer per sida med numrerade sidor och Föregående/Nästa. Sorteringen följer med när man byter sida; miniatyrbilder laddas först när de behövs.
+
 ## Snabbstart för många sajter
 
 1. Skapa **en egen Node.js-app per domän** i cPanel. Välj Git-källan `https://github.com/vinberg88/adultscript.git` och Node.js 22 eller senare.
