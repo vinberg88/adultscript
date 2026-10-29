@@ -31,6 +31,7 @@ function sameOrigin(req, res, next) {
 
 async function adminAuth(req, res, next) {
     res.set('Cache-Control', 'no-store');
+    res.set('X-Robots-Tag', 'noindex, nofollow');
     try {
         const config = await readSiteConfig();
         const password = process.env.ADMIN_PASSWORD;
