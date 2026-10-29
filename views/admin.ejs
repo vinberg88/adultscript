@@ -5,70 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Gratis Erotik</title>
     <link rel="stylesheet" href="/css/style.css">
-    <style>
-        .admin-container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-            background: #222;
-            border-radius: 10px;
-            border: 1px solid #ff9900;
-        }
-        .video-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #333;
-            font-size: 0.9rem;
-        }
-        .video-item:hover {
-            background: #2a2a2a;
-        }
-        .btn-delete {
-            background: #cc0000;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .btn-clear {
-            background: #ff9900;
-            color: black;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        .btn-delete:hover {
-        }
-    </style>
 </head>
-<body>
-    <header>
-        <h1 class="logo">ADMIN PANEL</h1>
-    </header>
-    <main>
-        <div class="admin-container">
-            <h2>Hantering av filmer</h2>
-            <form action="/admin/clear-all" method="POST">
-                <button type="submit" class="btn-clear">Rensa alla filmer (Töm databasen)</button>
+<body style="background-color: #0f0f0f; color: white;">
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Sajthuvud: Kontrollpanel</h1>
+            <form action="/admin/force-import" method="POST">
+                <button type="submit" class="btn-success"><i class="fas fa-sync"></i> Tvinga Import Nu</button>
             </form>
-            <div class="video-list">
-                <% videos.forEach(video => { %>
-                    <div class="video-item">
-                        <span><%= video.title %></span>
-                        <form action="/admin/delete-video" method="POST" style="display:inline;">
-                            <input type="hidden" name="id" value="<%= video.id %>">
-                            <button type="submit" class="btn-delete">Ta bort</button>
-                        </form>
-                    </div>
-                <% }) %>
-            </div>
         </div>
-    </main>
+
+        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <p>Totalt antal filmer i databasen: <strong><%= videos.length %></strong></p>
+            <form action="/admin/clear" method="POST" onsubmit="return confirm('Är du säker på att du vill rensa ALLA filmer?');">
+                <button type="submit" class="btn-danger">Rensa hela databasen</button>
+            </form>
+        </div>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Titel</th>
+                    <th>Källa</th>
+                    <th>Åtgärd</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% videos.forEach(video => { %>
+                    <tr>
+                        <td><%= video.title %></td>
+                        <td><%= video.source %></td>
+                        <td>
+                            <form action="/admin/delete/<%= video.id %>" method="POST" style="display:inline;">
+                                <button type="submit" class="btn-danger">Ta bort</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

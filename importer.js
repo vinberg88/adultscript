@@ -10,116 +10,99 @@ const SOURCES = [
         name: 'Pornhub',
         url: 'https://www.pornhub.com/video/webmasterss',
         selectors: {
-            item: '.video-item, .video-card, .video-thumb',
-            title: '.title',
-            link: 'a',
-            img: 'img'
+            item: '.video-item, .video-card',
+            title: '.title, .video-title',
+            link: 'a.video-link, a[href*="/video/"]',
+            thumb: 'img.thumb, img[src*="preview"]'
         }
     },
     {
         name: 'eVideos',
-        url: 'https://www.evideos.com/', // Example base URL
+        url: 'https://evideos.com', // Simplified for example, usually requires specific pages
         selectors: {
-            item: '.video-card, .video-item',
+            item: '.video-entry, .video-item',
             title: '.title, h3',
             link: 'a',
-            img: 'img'
+            thumb: 'img'
         }
     }
 ];
 
+const SEO_PREFIXES = ['Heta', 'Bästa', 'Premium', 'Snygga', 'Hårda', 'Exklusiva', 'Snabba'];
+
 async function importVideos() {
-    console.log('Starting multi-source auto-import...');
-    try {
-        let allNewVideos = [];
-        const currentVideos = await fs.readJson(DATA_FILE).catch(() => []);
-        const existingUrls = new Set(currentVideos.map(v => v.url));
+    console.log('Starting Multi-Source Import...');
+    let allImported = [];
 
-        for (const source of SOURCES) {
+    for (const source of SOURCES) {
+        try {
             console.log(`Fetching from ${source.name}...`);
-            try {
-                const response = await axios.get(source.url, {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-                    },
-                    timeout: 10000
-                });
+            const { data } = await axios.get(source.url, { 
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36' },
+                timeout: 10000 
+            });
+            const $ = cheerio.load(data);
+            
+            $(source.selectors.item).each((i, elem) => {
+                const title = $(elem).find(source.selectors.title).text().trim();
+                let link = $(elem).find(source.selectors.link).attr('href');
+                const thumb = $(elem).find(source.selectors.thumb).attr('src');
 
-                const $ = cheerio.load(response.data);
-                const sourceVideos = [];
-
-                $(source.selectors.item).each((i, elem) => {
-                    const title = $(elem).find(source.selectors.title).text().trim() || 'Snygg Video';
-                    const url = $(elem).find(source.selectors.link).attr('href');
-                    const thumbnail = $(elem).find(source.selectors.img).attr('src');
-
-                    if (url && !existingUrls.has(url)) {
-                        const absoluteUrl = url.startsWith('http') ? url : `${source.url}${url}`;
-                        
-                        const seoKeywords = ['Heta', 'Snygg', 'Heta', 'Gratis', 'Bästa', 'Sexig', 'Premium', 'Hård', 'Smaskig'];
-                        const randomKeyword = seoKeywords[Math.floor(Math.random() * seoKeywords.length)];
-                        const finalTitle = `${randomKeyword} ${title} - Gratis Erotik`;
-
-                        sourceVideos.push({
-                            id: `${Date.now()}-${source.name}-${i}`,
-                            title: finalTitle,
-                            thumbnail: thumbnail || `https://picsum.photos/seed/${Date.now()}-${i}/300/169`,
-                            url: absoluteUrl,
-                            source: source.name,
-                            importedAt: new Date().toISOString()
-                        });
+                if (link && title) {
+                    if (link.startsWith('/')) {
+                        link = (source.name === 'Pornhub' ? 'https://www.pornhub.com' : 'https://evideos.com') + link;
                     }
-                });
-
-                allNewVideos.push(...sourceVideos);
-            } catch (srcErr) {
-                console.error(`Failed to fetch from ${source.name}:`, srcErr.message);
-            }
+                    
+                    const prefix = SEO_PREFIXES[Math.floor(Math.random() * SEO_PREFIXES.length)];
+                    allImported.push({
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        title: `${prefix} ${title} - Gratis Erotik`,
+                        url: link,
+                        thumbnail: thumb || `https://picsum.photos/seed/${Math.random()}/300/169`,
+                        source: source.name,
+                        date: new Date().toISOString()
+                    });
+                }
+            });
+        } catch (e) {
+            console.error(`Error scraping ${source.name}:`, e.message);
         }
+    }
 
-        // Ensure we hit the ~500 videos/day mark for SEO growth
-        if (allNewVideos.length < 500) {
-            console.log('Filling remaining quota to maintain 500/day volume...');
-            const remaining = 500 - allNewVideos.length;
-            for (let i = 0; i < remaining; i++) {
-                const id = Date.now() + i;
-                allNewVideos.push({
-                    id: id.toString(),
-                    title: `Premium Video ${id} - Gratis Erotik`,
-                    thumbnail: `https://picsum.photos/seed/${id}/300/169`,
-                    url: `https://www.w3schools.com/html/mov_bbb.mp4?v=${id}`,
-                    source: 'Generated',
-                    importedAt: new Date().toISOString()
-                });
-            }
+    // Load existing videos
+    let existingVideos = [];
+    try {
+        if (await fs.pathExists(DATA_FILE)) {
+            existingVideos = await fs.readJson(DATA_FILE);
         }
-
-        const totalVideos = [...currentVideos, ...allNewVideos];
-        await fs.writeJson(DATA_FILE, totalVideos, { spaces: 2 });
-        console.log(`Successfully imported ${allNewVideos.length} videos. Total database size: ${totalVideos.length}`);
-
-    } catch (error) {
-        console.error('Critical error during multi-import:', error);
-        await mockImport();
+    } catch (e) {
+        existingVideos = [];
     }
-}
 
-async function mockImport() {
-    console.log('Running safety mock import...');
-    const currentVideos = await fs.readJson(DATA_FILE).catch(() => []);
-    const newVideos = [];
-    for (let i = 0; i < 500; i++) {
-        const id = Date.now() + i;
-        newVideos.push({
-            id: id.toString(),
-            title: `Imported Video ${id} - Gratis Erotik`,
-            thumbnail: `https://picsum.photos/seed/${id}/300/169`,
-            url: `https://www.w3schools.com/html/mov_bbb.mp4?v=${id}`,
-            source: 'Mock',
-            importedAt: new Date().toISOString()
-        });
+    // Merge and remove duplicates based on URL
+    const urlSet = new Set(existingVideos.map(v => v.url));
+    const uniqueNew = allImported.filter(v => !urlSet.has(v.url));
+    
+    const finalVideos = [...existingVideos, ...uniqueNew];
+
+    // Fallback: Ensure at least 500 new videos per day (simulated growth)
+    if (uniqueNew.length < 500) {
+        const deficit = 500 - uniqueNew.length;
+        for (let i = 0; i < deficit; i++) {
+            const prefix = SEO_PREFIXES[Math.floor(Math.random() * SEO_PREFIXES.length)];
+            finalVideos.push({
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                title: `${prefix} Häftig Film ${Math.floor(Math.random() * 100000)} - Gratis Erotik`,
+                url: 'https://www.w3schools.com/html/mov_bbb.mp4',
+                thumbnail: `https://picsum.photos/seed/${Math.random()}/300/169`,
+                source: 'Automated',
+                date: new Date().toISOString()
+            });
+        }
     }
-    await fs.writeJson(DATA_FILE, [...currentVideos, ...newVideos], { spaces: 2 });
+
+    await fs.writeJson(DATA_FILE, finalVideos, { spaces: 2 });
+    console.log(`Import complete. Total videos in DB: ${finalVideos.length}`);
 }
 
 module.exports = { importVideos };

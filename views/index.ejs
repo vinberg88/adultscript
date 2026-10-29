@@ -1,30 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gratis Erotik - Bästa Gratis Filmerna</title>
-    <meta name="description" content="Hitta de bästa gratis erotiska filmerna på gratis-erotik.se. Massor av innehåll helt gratis!">
-    <meta name="keywords" content="gratis erotik, porr, gratis filmer, erotiska klipp">
+    <title>Gratis Erotik - Världens Största Bibliotek av Gratis Filmer</title>
+    <meta name="description" content="Välkommen till gratis-erotik.se. Vi erbjuder tusentals gratis erotiska filmer, uppdaterade varje dag. Ingen registrering, bara njutning.">
+    <meta name="keywords" content="gratis erotik, porr, gratis filmer, erotiska klipp, gratis porr">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
-        <h1 class="logo">GRATIS EROTIK</h1>
-        <nav>
-            <a href="/">Hem</a>
-        </nav>
+        <div class="header-container">
+            <h1 class="logo">GRATIS <span>EROTIK</span></h1>
+            <nav>
+                <a href="/"><i class="fas fa-home"></i> Hem</a>
+                <a href="#"><i class="fas fa-fire"></i> Trendande</a>
+                <a href="#"><i class="fas fa-star"></i> Premium</a>
+            </nav>
+        </div>
     </header>
+
+    <div class="hero">
+        <h2>Hitta dina favoritfilmer helt gratis</h2>
+        <p>Tusentals nya klipp varje dag. Uppdaterat nu!</p>
+    </div>
+
     <main>
+        <div class="category-bar">
+            <span class="cat-tag active">Alla</span>
+            <span class="cat-tag">Amatörer</span>
+            <span class="cat-tag">Professionella</span>
+            <span class="cat-tag">Heta</span>
+            <span class="cat-tag">Snabba</span>
+        </div>
+
         <div class="video-grid">
             <% videos.forEach(video => { %>
                 <div class="video-card">
                     <a href="/video/<%= video.id %>">
-                        <img src="<%= video.thumbnail %>" alt="<%= video.title %>">
+                        <div class="thumb-container">
+                            <img src="<%= video.thumbnail %>" alt="<%= video.title %>" loading="lazy">
+                            <div class="duration">05:20</div>
+                        </div>
                         <div class="card-info">
-                            <p><%= video.title %></p>
+                            <p class="video-title"><%= video.title %></p>
                             <div class="card-stats">
-                                <span class="stat"><i class="far fa-thumbs-up"></i> 👍 <%= Math.floor(Math.random() * 1000) + 100 %></span>
+                                <span class="stat"><i class="fas fa-thumbs-up"></i> <%= Math.floor(Math.random() * 1000) + 100 %></span>
+                                <span class="stat"><i class="fas fa-eye"></i> <%= Math.floor(Math.random() * 5000) + 500 %></span>
                             </div>
                         </div>
                     </a>
@@ -32,15 +55,18 @@
             <% }) %>
         </div>
     </main>
+
     <footer>
-        <div class="footer-links">
-            <a href="#">Om oss</a>
-            <a href="#">Kontakt</a>
-            <a href="#">Villkor</a>
-            <a href="#">Integritetspolicy</a>
-            <a href="#">DMCA</a>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">Om oss</a>
+                <a href="#">Kontakt</a>
+                <a href="#">Villkor</a>
+                <a href="#">Integritetspolicy</a>
+                <a href="#">DMCA</a>
+            </div>
+            <p>&copy; 2024 Gratis Erotik - Den ultimata destinationen för gratis nöjen.</p>
         </div>
-        <p>&copy; 2024 Gratis Erotik - Alla rättigheter förbehållna.</p>
     </footer>
 </body>
 </html>
