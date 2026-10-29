@@ -6,12 +6,16 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Mock data for videos
-const videos = [
-  { id: '1', title: 'Sample Video 1', thumbnail: 'https://via.placeholder.com/150', url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-  { id: '2', title: 'Sample Video 2', thumbnail: 'https://via.placeholder.com/150', url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-  { id: '3', title: 'Sample Video 3', thumbnail: 'https://via.placeholder.com/150', url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-];
+// Mock data for videos - Expanded for "masses of movies"
+const videos = [];
+for (let i = 1; i <= 100; i++) {
+  videos.push({
+    id: i.toString(),
+    title: `Häftig Film ${i} - Gratis Erotik`,
+    thumbnail: `https://picsum.photos/seed/${i}/300/169`,
+    url: 'https://www.w3schools.com/html/mov_bbb.mp4'
+  });
+}
 
 app.get('/', (req, res) => {
   res.render('index', { videos });
