@@ -85,3 +85,27 @@ video {
     box-shadow: 0 0 30px rgba(0,0,0,0.7);
     background: #000;
 }
+footer {
+    background-color: #000;
+    padding: 30px 20px;
+    text-align: center;
+    border-top: 3px solid #ff9900;
+    margin-top: 50px;
+}
+.footer-links {
+    margin-bottom: 20px;
+}
+.footer-links a {
+    color: #bbb;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+.footer-links a:hover {
+    color: #ff9900;
+}
+footer p {
+    color: #666;
+    font-size: 0.8rem;
+}
