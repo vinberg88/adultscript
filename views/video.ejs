@@ -1,49 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= video.title %> - Gratis Erotik</title>
     <meta name="description" content="Titta på <%= video.title %> gratis på gratis-erotik.se.">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header>
-        <h1 class="logo">GRATIS EROTIK</h1>
-        <nav>
-            <a href="/">Hem</a>
-        </nav>
+        <div class="header-container">
+            <h1 class="logo">GRATIS <span>EROTIK</span></h1>
+            <nav>
+                <a href="/"><i class="fas fa-home"></i> Hem</a>
+            </nav>
+        </div>
     </header>
-    <main>
-        <div class="video-container">
-            <h2><%= video.title %></h2>
-            
-            <% if (video.url.includes('pornhub.com') || video.url.includes('evideos.com') || !video.url.endsWith('.mp4')) { %>
-                <div class="embed-container">
-                    <iframe src="<%= video.url %>" frameborder="0" allowfullscreen></iframe>
-                </div>
-            <% } else { %>
-                <video controls width="100%">
-                    <source src="<%= video.url %>" type="video/mp4">
-                    Din webbläsare stöder inte videospelaren.
-                </video>
-            <% } %>
 
-            <div class="video-actions">
-                <button class="like-btn">👍 <%= Math.floor(Math.random() * 1000) + 100 %></button>
-                <button class="share-btn">Dela</button>
+    <main>
+        <div class="video-page-layout">
+            <div class="main-player">
+                <div class="embed-container">
+                    <% if (video.url.endsWith('.mp4')) { %>
+                        <video controls width="100%" autoplay>
+                            <source src="<%= video.url %>" type="video/mp4">
+                            Din webbläsare stöder inte videospelaren.
+                        </video>
+                    <% } else { %>
+                        <iframe src="<%= video.url %>" frameborder="0" allowfullscreen></iframe>
+                    <% } %>
+                </div>
+                <div class="video-details">
+                    <h1><%= video.title %></h1>
+                    <div class="video-actions">
+                        <button class="action-btn like-btn"><i class="fas fa-thumbs-up"></i> <%= Math.floor(Math.random() * 1000) + 100 %></button>
+                        <button class="action-btn share-btn"><i class="fas fa-share"></i> Dela</button>
+                        <button class="action-btn save-btn"><i class="fas fa-heart"></i> Spara</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="related-videos">
+                <h3>Liknande Filmer</h3>
+                <div class="related-list">
+                    <% related.forEach(rel => { %>
+                        <a href="/video/<%= rel.id %>" class="related-item">
+                            <img src="<%= rel.thumbnail %>" alt="<%= rel.title %>">
+                            <p><%= rel.title %></p>
+                        </a>
+                    <% }) %>
+                </div>
             </div>
         </div>
     </main>
+
     <footer>
-        <div class="footer-links">
-            <a href="#">Om oss</a>
-            <a href="#">Kontakt</a>
-            <a href="#">Villkor</a>
-            <a href="#">Integritetspolicy</a>
-            <a href="#">DMCA</a>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">Om oss</a>
+                <a href="#">Kontakt</a>
+                <a href="#">Villkor</a>
+                <a href="#">Integritetspolicy</a>
+                <a href="#">DMCA</a>
+            </div>
+            <p>&copy; 2024 Gratis Erotik - Alla rättigheter förbehållna.</p>
         </div>
-        <p>&copy; 2024 Gratis Erotik - Alla rättigheter förbehållna.</p>
     </footer>
 </body>
 </html>

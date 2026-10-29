@@ -5,67 +5,94 @@ const fs = require('fs-extra');
 const cron = require('node-cron');
 const { importVideos } = require('./importer');
 
+// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
 
 const DATA_FILE = path.join(__dirname, 'videos.json');
 
-// Load videos from JSON file
-async function getVideos() {
-  try {
-    return await fs.readJson(DATA_FILE);
-  } catch (e) {
-    return [];
-  }
+// Robust JSON loading with caching
+let videoCache = [];
+async function loadVideos() {
+    try {
+        if (await fs.pathExists(DATA_FILE)) {
+            videoCache = await fs.readJson(DATA_FILE);
+        } else {
+            videoCache = [];
+            await fs.writeJson(DATA_FILE, videoCache);
+        }
+    } catch (e) {
+        console.error('Error loading videos.json, using empty array:', e);
+        videoCache = [];
+    }
+    return videoCache;
 }
 
+// Routes
 app.get('/', async (req, res) => {
-  const videos = await getVideos();
-  res.render('index', { videos });
+    await loadVideos();
+    // Shuffle or slice for a "fresh" look on home page
+    const shuffled = [...videoCache].sort(() => 0.5 - Math.random());
+    res.render('index', { videos: shuffled });
 });
 
 app.get('/video/:id', async (req, res) => {
-  const videos = await getVideos();
-  const video = videos.find(v => v.id === req.params.id);
-  if (!video) return res.status(404).send('Video not found');
-  res.render('video', { video });
+    await loadVideos();
+    const video = videoCache.find(v => v.id === req.params.id);
+    if (!video) return res.status(404).send('Video not found');
+    
+    // Get a few related videos
+    const related = videoCache
+        .filter(v => v.id !== video.id)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 6);
+
+    res.render('video', { video, related });
 });
 
-// Secret Admin Path
+// Secret Admin Panel
 app.get('/secret-admin-panel-777', async (req, res) => {
-  const videos = await getVideos();
-  res.render('admin', { videos });
+    await loadVideos();
+    res.render('admin', { videos: videoCache });
 });
 
-app.post('/admin/delete-video', async (req, res) => {
-  const { id } = req.body;
-  const videos = await getVideos();
-  const filteredVideos = videos.filter(v => v.id !== id);
-  await fs.writeJson(DATA_FILE, filteredVideos, { spaces: 2 });
-  res.redirect('/secret-admin-panel-777');
+app.post('/admin/delete/:id', async (req, res) => {
+    await loadVideos();
+    videoCache = videoCache.filter(v => v.id !== req.params.id);
+    await fs.writeJson(DATA_FILE, videoCache);
+    res.redirect('/secret-admin-panel-777');
 });
 
-app.post('/admin/clear-all', async (req, res) => {
-  await fs.writeJson(DATA_FILE, [], { spaces: 2 });
-  res.redirect('/secret-admin-panel-777');
+app.post('/admin/clear', async (req, res) => {
+    videoCache = [];
+    await fs.writeJson(DATA_FILE, videoCache);
+    res.redirect('/secret-admin-panel-777');
 });
 
-// Schedule auto-import to run every day at midnight
+app.post('/admin/force-import', async (req, res) => {
+    try {
+        await importVideos();
+        await loadVideos(); // Refresh cache
+        res.redirect('/secret-admin-panel-777');
+    } catch (e) {
+        res.status(500).send('Import failed: ' + e.message);
+    }
+});
+
+// Daily Cron Job (Midnight)
 cron.schedule('0 0 * * *', () => {
-  importVideos();
+    console.log('Running scheduled daily import...');
+    importVideos().catch(console.error);
 });
 
-// Also run once on startup to ensure we have content
-// Wrapped in a try-catch block to prevent app from crashing on startup if import fails
-importVideos().catch(err => {
-  console.error('Startup import failed, but app will continue to run:', err);
-});
+// Startup Import
+importVideos().catch(err => console.error('Initial import error:', err));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
