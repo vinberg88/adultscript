@@ -89,10 +89,20 @@ cron.schedule('0 0 * * *', () => {
     importVideos().catch(console.error);
 });
 
-// Startup Import
-importVideos().catch(err => console.error('Initial import error:', err));
+// Startup Import - Moved to run AFTER the server starts to prevent cPanel deployment failure
+const startImport = async () => {
+    console.log('Starting initial import...');
+    try {
+        await importVideos();
+        console.log('Initial import completed successfully.');
+    } catch (err) {
+        console.error('Initial import error (app will still run):', err);
+    }
+};
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    // Trigger import after the port is listening
+    startImport();
 });
