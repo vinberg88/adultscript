@@ -32,6 +32,10 @@ test('installer requires its code, stores a password hash, and closes after setu
     try {
         assert.equal((await fetch(`${base}/install`)).status, 200);
         assert.equal((await fetch(`${base}/install`, { method: 'POST', body: form, headers: { origin: 'https://other.example' } })).status, 403);
+        assert.equal((await fetch(`${base}/install`, {
+            method: 'POST', body: JSON.stringify(Object.fromEntries(form)),
+            headers: { origin: base, 'content-type': 'application/json' }
+        })).status, 415);
         const wrong = new URLSearchParams(form);
         wrong.set('token', 'incorrect');
         assert.equal((await fetch(`${base}/install`, { method: 'POST', body: wrong, headers: { origin: base } })).status, 403);

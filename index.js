@@ -81,6 +81,7 @@ app.get('/install', async (req, res, next) => {
 app.post('/install', sameOrigin, async (req, res, next) => {
     try {
         if (!installerEnabled() || await readSiteConfig()) return res.sendStatus(404);
+        if (!req.is('application/x-www-form-urlencoded')) return res.sendStatus(415);
         await createSiteConfig(req.body);
         if (require.main === module) importVideos().catch(console.error);
         res.redirect('/secret-admin-panel-777?installed=1');
