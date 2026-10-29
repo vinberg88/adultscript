@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Installera - Gratis Erotik</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="install-page">
+    <main class="install-card">
+        <div class="install-eyebrow">Engångsinstallation</div>
+        <h1>Konfigurera sajten</h1>
+        <p>Ange installationskoden från cPanel. Dina befintliga filmer sparas och importen startar när inställningarna är klara.</p>
+        <% if (error) { %><p class="install-error" role="alert"><%= error %></p><% } %>
+        <form action="/install" method="post" class="install-form">
+            <label for="token">Installationskod</label>
+            <input id="token" name="token" type="password" autocomplete="off" required>
+
+            <label for="adminUser">Adminanvändare</label>
+            <input id="adminUser" name="adminUser" type="text" value="admin" minlength="3" maxlength="32" autocomplete="username" required>
+
+            <label for="password">Adminlösenord</label>
+            <input id="password" name="password" type="password" minlength="12" autocomplete="new-password" required>
+
+            <label for="confirmPassword">Upprepa adminlösenordet</label>
+            <input id="confirmPassword" name="confirmPassword" type="password" minlength="12" autocomplete="new-password" required>
+
+            <label for="pages">Sidor att hämta per import</label>
+            <select id="pages" name="pages">
+                <option value="1">1 sida (cirka 30 filmer)</option>
+                <option value="2">2 sidor (cirka 60 filmer)</option>
+                <option value="3">3 sidor (cirka 90 filmer)</option>
+                <option value="4">4 sidor (cirka 120 filmer)</option>
+                <option value="5">5 sidor (cirka 150 filmer)</option>
+            </select>
+
+            <label for="search">Sökord hos Pornhub <span class="install-optional">valfritt</span></label>
+            <input id="search" name="search" type="text" maxlength="100" placeholder="Tomt visar de senaste filmerna">
+
+            <button type="submit" class="install-submit">Slutför installationen</button>
+        </form>
+        <p class="install-note">Installationssidan låses efter att inställningarna har sparats.</p>
+    </main>
+</body>
+</html>

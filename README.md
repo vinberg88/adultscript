@@ -1,58 +1,26 @@
-# AdultScript 🔞
+# AdultScript
 
-A basic Node.js video portal template designed for easy deployment on cPanel and other hosting environments.
+Node.js videoportal för cPanel. Importören hämtar metadata från Pornhubs Webmasters API och visar filmer med Pornhubs inbäddade spelare. Den laddar inte ned eller lagrar videofiler.
 
-## 🚀 Features
-- Dark-themed responsive UI.
-- Video gallery grid.
-- Dedicated video player page.
-- Lightweight Express.js backend.
+## Installation i cPanel
 
-## 🛠 Installation Guide (cPanel)
+1. Skapa en Node.js-app med `index.js` som startfil och Node.js 22 eller senare. Kör `npm ci` i appens katalog.
+2. Skapa en unik installationskod, till exempel i WHM Terminal med `openssl rand -hex 32`. Kopiera koden till cPanels miljövariabel `INSTALL_TOKEN`. Lägg aldrig koden i GitHub eller i ett chattmeddelande.
+3. Starta om appen och öppna `https://din-domän/install` i webbläsaren. Ange installationskoden, välj adminanvändare och lösenord, samt antal sidor och ett eventuellt sökord för importen.
+4. Efter installationen låses `/install`. Ta bort `INSTALL_TOKEN` från cPanel och starta om appen. Adminpanelen finns på `/secret-admin-panel-777`.
 
-Since you are using cPanel, follow these steps to get the site live:
+Installationssidan skriver bara `data/site.json` med en saltad hash av adminlösenordet och valen för importen. Den ändrar inte `videos.json`. Första importen börjar efter installationen och därefter vid midnatt enligt serverns tidszon. Befintliga poster sparas; nya Pornhub-poster läggs till utan dubbletter. Om API:t misslyckas lämnas filen orörd.
 
-### 1. Upload Files
-Upload all project files (except `node_modules`) to your server using File Manager or FTP.
+För en befintlig sajt: kopiera `videos.json` till en plats utanför appmappen före uppdateringen. Spara även `data/site.json` efter installationen som del av din ordinarie säkerhetskopia. `data/site.json` hålls utanför Git; det befintliga `videos.json` är fortfarande en spårad fil och måste bevaras vid uppdateringar.
 
-### 2. Setup Node.js Application
-1. Log in to your **cPanel**.
-2. Search for **"Setup Node.js App"** in the software section.
-3. Click **"Create Application"**.
-4. Fill in the following details:
-   - **Node.js version**: Select the latest stable version (e.g., 16.x or 18.x).
-   - **Application mode**: Production.
-   - **Application root**: The folder where you uploaded the files (e.g., `adultscript`).
-   - **Application URL**: Choose the domain or subdomain you want the site to live on.
-   - **Application startup file**: `index.js`.
-5. Click **Create**.
+## Alternativ utan webbinstaller
 
-### 3. Install Dependencies
-1. Once the app is created, you will see a button that says **"Run NPM Install"**. Click it.
-2. This will automatically install `express` and `ejs` based on the `package.json` file.
+Om `INSTALL_TOKEN` inte är satt fortsätter appen att fungera med `ADMIN_USER` (standard `admin`) och `ADMIN_PASSWORD` i cPanels miljövariabler. `PORN_HUB_IMPORT_PAGES` (1–5) och `PORN_HUB_SEARCH` styr importen tills webbinstallationen har sparat egna val.
 
-### 4. Start the App
-1. Click **"Restart"** if the application is not already running.
-2. Visit your Application URL to see the site!
+## Privat GitHub-repo
 
-## ⚙️ Configuration
-Currently, the videos are stored in a mock array in `index.js`. 
+Ge servern en separat SSH-nyckel och lägg endast den publika nyckeln som en skrivskyddad deploy key i repots inställningar. Den privata nyckeln stannar på servern. Spara aldrig `ADMIN_PASSWORD`, `INSTALL_TOKEN`, SSH-nycklar eller `.env` i repot.
 
-**To add your own videos:**
-Open `index.js` and edit the `videos` array:
-```javascript
-const videos = [
-  { 
-    id: '1', 
-    title: 'Your Video Title', 
-    thumbnail: 'https://your-image-url.com/thumb.jpg', 
-    url: 'https://your-video-url.com/video.mp4' 
-  },
-];
-```
+## Tester
 
-## 📁 Project Structure
-- `/public` - Static assets (CSS, Images).
-- `/views` - EJS templates for HTML rendering.
-- `index.js` - Main server logic and routing.
-- `package.json` - Project dependencies and scripts.
+`npm test` kör tester utan att kontakta Pornhub.

@@ -22,7 +22,9 @@
         <div class="video-page-layout">
             <div class="main-player">
                 <div class="embed-container">
-                    <% if (video.url.endsWith('.mp4')) { %>
+                    <% if (video.embedUrl) { %>
+                        <iframe src="<%= video.embedUrl %>" frameborder="0" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                    <% } else if (video.url.endsWith('.mp4')) { %>
                         <video controls width="100%" autoplay>
                             <source src="<%= video.url %>" type="video/mp4">
                             Din webbläsare stöder inte videospelaren.
@@ -34,9 +36,9 @@
                 <div class="video-details">
                     <h1><%= video.title %></h1>
                     <div class="video-actions">
-                        <button class="action-btn like-btn"><i class="fas fa-thumbs-up"></i> <%= Math.floor(Math.random() * 1000) + 100 %></button>
-                        <button class="action-btn share-btn"><i class="fas fa-share"></i> Dela</button>
-                        <button class="action-btn save-btn"><i class="fas fa-heart"></i> Spara</button>
+                        <% if (video.views != null) { %><span class="action-btn"><i class="fas fa-eye"></i> <%= video.views.toLocaleString('sv-SE') %> visningar</span><% } %>
+                        <% if (video.rating != null) { %><span class="action-btn"><i class="fas fa-thumbs-up"></i> <%= video.rating %>%</span><% } %>
+                        <% if (video.source === 'Pornhub') { %><a class="action-btn" href="<%= video.url %>" rel="noopener noreferrer" target="_blank">Visa hos Pornhub</a><% } %>
                     </div>
                 </div>
             </div>
