@@ -41,7 +41,7 @@
                     <h1><%= video.title %></h1>
                     <div class="video-actions">
                         <% if (video.views != null) { %><span class="action-btn"><i class="fas fa-eye"></i> <%= video.views.toLocaleString('sv-SE') %> visningar</span><% } %>
-                        <% if (video.rating != null) { %><span class="action-btn"><i class="fas fa-thumbs-up"></i> <%= video.rating %>%</span><% } %>
+                        <% if (video.rating != null) { %><span class="action-btn"><i class="fas fa-thumbs-up"></i> <%= video.rating.toLocaleString('sv-SE', { maximumFractionDigits: 1 }) %>%</span><% } %>
                         <% if (video.source === 'Pornhub') { %><a class="action-btn" href="<%= video.url %>" rel="noopener noreferrer" target="_blank">Visa hos Pornhub</a><% } %>
                     </div>
                 </div>

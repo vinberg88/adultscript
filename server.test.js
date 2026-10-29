@@ -37,7 +37,7 @@ test('renders imported metadata and the Pornhub embed URL', async () => {
         id: 'pornhub-abc123', title: 'Example', source: 'Pornhub',
         url: 'https://www.pornhub.com/view_video.php?viewkey=abc123',
         embedUrl: 'https://www.pornhub.com/embed/abc123',
-        thumbnail: 'https://example.com/thumb.jpg', duration: '11:26', views: 3362, rating: 80
+        thumbnail: 'https://example.com/thumb.jpg', duration: '11:26', views: 3362, rating: 90.9091
     };
     const site = siteForHost('snusk.eu');
     const ads = { top: { enabled: false }, bottom: { enabled: false } };
@@ -45,6 +45,9 @@ test('renders imported metadata and the Pornhub embed URL', async () => {
     const detail = await ejs.renderFile(path.join(__dirname, 'views/video.ejs'), { video, related: [], site, ads });
     assert.match(home, /11:26/);
     assert.match(home, /3\s?362/);
+    assert.match(home, /90,9%/);
+    assert.match(detail, /90,9%/);
+    assert.doesNotMatch(home, /90\.9091%/);
     assert.match(detail, /https:\/\/www\.pornhub\.com\/embed\/abc123/);
     assert.doesNotMatch(home, /05:20/);
     assert.match(home, /Snusk - Filmer/);
