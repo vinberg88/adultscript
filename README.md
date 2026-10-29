@@ -1,4 +1,4 @@
-# AdultScript
+# AdultScript - Sök bland filmerna =)
 
 Node.js videoportal för cPanel. Importören hämtar metadata från Pornhubs Webmasters API och visar filmer med Pornhubs inbäddade spelare. Den laddar inte ned eller lagrar videofiler.
 
