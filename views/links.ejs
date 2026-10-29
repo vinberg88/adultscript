@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Länkar till andra webbplatser.">
+    <title>Länkar - Gratis Erotik</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1 class="logo"><a href="/">GRATIS <span>EROTIK</span></a></h1>
+            <nav aria-label="Huvudmeny">
+                <a href="/"><i class="fas fa-home"></i> Hem</a>
+                <a href="/#filmer"><i class="fas fa-play"></i> Filmer</a>
+                <a href="/lankar" aria-current="page"><i class="fas fa-link"></i> Länkar</a>
+                <a href="/secret-admin-panel-777" rel="nofollow"><i class="fas fa-lock"></i> Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="links-page">
+        <div class="links-intro">
+            <h2>Länkar</h2>
+            <p>Fler webbplatser att upptäcka. Länkarna öppnas i en ny flik.</p>
+        </div>
+        <div class="links-grid">
+            <% links.forEach(link => { %>
+                <a class="link-card" href="<%= link[1] %>" target="_blank" rel="noopener noreferrer">
+                    <strong><%= link[0] %></strong>
+                    <span><%= new URL(link[1]).hostname %> <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+                </a>
+            <% }) %>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="/">Hem</a>
+                <a href="/#filmer">Filmer</a>
+                <a href="/lankar">Länkar</a>
+                <a href="/secret-admin-panel-777" rel="nofollow">Admin</a>
+            </div>
+            <p>&copy; <%= new Date().getFullYear() %> Gratis Erotik.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -11,6 +11,8 @@ Node.js videoportal för cPanel. Importören hämtar metadata från Pornhubs Web
 
 Installationssidan skriver bara `data/site.json` med en saltad hash av adminlösenordet och valen för importen. Den ändrar inte `videos.json`. Första importen börjar efter installationen och därefter vid midnatt enligt serverns tidszon. Befintliga poster sparas; nya Pornhub-poster läggs till utan dubbletter. Om API:t misslyckas lämnas filen orörd.
 
+Samma privata repo kan installeras på en ny domän i en **egen** cPanel-app: använd en ny appmapp, en ny `INSTALL_TOKEN` och öppna den nya domänens `/install`. Varje sajt får då egna adminuppgifter och egen `data/site.json`. En redan installerad sajt uppdateras med Redeploy; dess `/install` förblir låst och filmerna ska bevaras. Länksidan finns på `/lankar` och länkarna i `links.json` följer med nya installationer.
+
 För en befintlig sajt: kopiera `videos.json` till en plats utanför appmappen före uppdateringen. Spara även `data/site.json` efter installationen som del av din ordinarie säkerhetskopia. `data/site.json` hålls utanför Git; det befintliga `videos.json` är fortfarande en spårad fil och måste bevaras vid uppdateringar.
 
 ## Alternativ utan webbinstaller

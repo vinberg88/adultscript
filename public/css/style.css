@@ -42,17 +42,20 @@ nav a {
     gap: 5px;
 }
 nav a:hover { color: #ff9900; }
+nav a[aria-current="page"] { color: #ff9900; }
+a:focus-visible { outline: 2px solid #ff9900; outline-offset: 4px; }
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://picsum.photos/id/10/1400/300');
-    background-size: cover;
-    background-position: center;
+    background: radial-gradient(circle at 50% 0%, #502313 0%, #171013 56%, #0f0f0f 100%);
     text-align: center;
     padding: 60px 20px;
 }
 .hero h2 { font-size: 2.5rem; margin-bottom: 10px; color: #ff9900; }
 .hero p { font-size: 1.2rem; color: #ddd; }
+.hero-link { display: inline-block; margin-top: 16px; padding: 11px 22px; border-radius: 8px; background: #ff9900; color: #17100b; font-weight: 700; }
+.hero-link:hover { background: #ffb03b; }
+#filmer { scroll-margin-top: 85px; }
 
 /* Category Bar */
 .category-bar {
@@ -73,6 +76,18 @@ nav a:hover { color: #ff9900; }
     border: 1px solid #333;
 }
 .cat-tag:hover, .cat-tag.active { background: #ff9900; color: #000; font-weight: bold; }
+.empty-state { grid-column: 1 / -1; text-align: center; color: #bbb; padding: 50px 20px; }
+
+/* Links directory */
+.links-page { max-width: 1400px; margin: 0 auto; padding: 34px 20px 70px; }
+.links-intro { text-align: center; margin-bottom: 32px; }
+.links-intro h2 { color: #ff9900; font-size: 2.3rem; margin: 0 0 8px; }
+.links-intro p { color: #bbb; margin: 0; }
+.links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.link-card { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 18px; border-radius: 10px; border: 1px solid #303030; background: #1a1a1a; transition: border-color .2s, transform .2s; }
+.link-card:hover { border-color: #ff9900; transform: translateY(-2px); }
+.link-card strong { font-size: 1rem; }
+.link-card span { color: #aaa; font-size: .82rem; overflow-wrap: anywhere; }
 
 /* Video Grid */
 .video-grid {
@@ -235,6 +250,8 @@ footer p { color: #555; font-size: 0.8rem; }
 @media (max-width: 900px) {
     .video-page-layout { grid-template-columns: 1fr; }
     .header-container { flex-direction: column; gap: 10px; }
+    nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; }
+    nav a { margin-left: 0; }
 }
 /* One-time installer */
 .install-page { min-height: 100vh; display: grid; place-items: center; padding: 28px 16px; background: #101014; color: #f5f5f7; }
