@@ -21,21 +21,25 @@ async function importVideos() {
         const existingUrls = new Set(currentVideos.map(v => v.url));
 
         // Selector for video items on Pornhub (approximate)
-        $('.video-thumb').each((i, elem) => {
             const title = $(elem).find('.title').text().trim() || 'Snygg Video';
             const url = $(elem).find('a').attr('href');
             const thumbnail = $(elem).find('img').attr('src');
 
             if (url && !existingUrls.has(url)) {
+                // SEO optimized titles
+                const seoKeywords = ['Häftig', 'Snygg', 'Heta', 'Gratis', 'Bästa', 'Sexig', 'Premium'];
+                const randomKeyword = seoKeywords[Math.floor(Math.random() * seoKeywords.length)];
+                const finalTitle = `${randomKeyword} ${title} - Gratis Erotik`;
+
                 newVideos.push({
                     id: (Date.now() + i).toString(),
-                    title: title,
+                    title: finalTitle,
                     thumbnail: thumbnail || `https://picsum.photos/seed/${i}/300/169`,
                     url: url,
                     importedAt: new Date().toISOString()
                 });
             }
-        });
+        }
 
         // If scraping didn't find enough, fill with some generated content to maintain the "500/day" feel
         if (newVideos.length < 10) {
