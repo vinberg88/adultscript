@@ -41,7 +41,6 @@ async function importVideos() {
                 });
             }
         });
-        }
 
         // If scraping didn't find enough, fill with some generated content to maintain the "500/day" feel
         if (newVideos.length < 10) {
