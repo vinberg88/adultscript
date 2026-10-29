@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= video.title %> - Gratis Erotik</title>
-    <meta name="description" content="Titta på <%= video.title %> gratis på gratis-erotik.se.">
+    <title><%= video.title %> - <%= site.name %></title>
+    <meta name="description" content="Titta på <%= video.title %> gratis på <%= site.domain %>.">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body style="--accent: <%= site.accent %>">
     <header>
         <div class="header-container">
-            <h1 class="logo"><a href="/">GRATIS <span>EROTIK</span></a></h1>
+            <h1 class="logo"><a href="/"><%= site.name %></a></h1>
             <nav aria-label="Huvudmeny">
                 <a href="/"><i class="fas fa-home"></i> Hem</a>
                 <a href="/#filmer"><i class="fas fa-play"></i> Filmer</a>
@@ -70,7 +70,7 @@
                 <a href="/#filmer">Filmer</a>
                 <a href="/lankar">Länkar</a>
             </div>
-            <p>&copy; <%= new Date().getFullYear() %> Gratis Erotik.</p>
+            <p>&copy; <%= new Date().getFullYear() %> <%= site.name %>.</p>
         </div>
     </footer>
 </body>

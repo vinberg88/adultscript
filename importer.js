@@ -1,8 +1,5 @@
-const fs = require('fs-extra');
-const path = require('path');
 const { readSiteConfig } = require('./config');
-
-const DATA_FILE = path.join(__dirname, 'videos.json');
+const { DATA_FILE, readVideos, writeVideos } = require('./video-store');
 const API_URL = 'https://www.pornhub.com/webmasters/search';
 let currentImport;
 
@@ -59,22 +56,14 @@ async function runImport({ fetchImpl = fetch, dataFile = DATA_FILE, pages, searc
         }
     }
 
-    if (!(await fs.pathExists(dataFile))) await fs.writeJson(dataFile, []);
-    const existing = await fs.readJson(dataFile);
-    if (!Array.isArray(existing)) throw new Error('videos.json must contain an array');
+    const existing = await readVideos(dataFile);
     const existingIds = new Set(existing.filter(v => v && v.source === 'Pornhub').map(v => {
         if (v.sourceId) return String(v.sourceId);
         try { return new URL(v.url).searchParams.get('viewkey'); } catch { return null; }
     }));
     const additions = [...incoming.values()].filter(v => !existingIds.has(v.sourceId));
     if (additions.length) {
-        const temporary = `${dataFile}.${process.pid}.tmp`;
-        try {
-            await fs.writeJson(temporary, [...existing, ...additions], { spaces: 2 });
-            await fs.rename(temporary, dataFile);
-        } finally {
-            await fs.remove(temporary);
-        }
+        await writeVideos([...existing, ...additions], dataFile);
     }
     return { fetched: incoming.size, added: additions.length, total: existing.length + additions.length };
 }

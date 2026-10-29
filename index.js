@@ -1,11 +1,12 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const fs = require('fs-extra');
 const cron = require('node-cron');
 const { importVideos } = require('./importer');
 const { readSiteConfig, createSiteConfig, verifyAdminPassword, safeEqual } = require('./config');
+const { readVideos, writeVideos } = require('./video-store');
 const links = require('./links.json');
+const { siteForHost } = require('./site-profile');
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -14,8 +15,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-const DATA_FILE = path.join(__dirname, 'videos.json');
+app.use((req, res, next) => {
+    res.locals.site = siteForHost(req.get('host'));
+    next();
+});
 
 function installerEnabled() {
     return typeof process.env.INSTALL_TOKEN === 'string' && process.env.INSTALL_TOKEN.length >= 32;
@@ -59,12 +62,7 @@ app.use('/admin', (req, res, next) => req.method === 'POST' ? sameOrigin(req, re
 let videoCache = [];
 async function loadVideos() {
     try {
-        if (await fs.pathExists(DATA_FILE)) {
-            videoCache = await fs.readJson(DATA_FILE);
-        } else {
-            videoCache = [];
-            await fs.writeJson(DATA_FILE, videoCache);
-        }
+        videoCache = await readVideos();
     } catch (e) {
         console.error('Error loading videos.json, using empty array:', e);
         videoCache = [];
@@ -140,13 +138,13 @@ app.get('/secret-admin-panel-777', async (req, res) => {
 app.post('/admin/delete/:id', async (req, res) => {
     await loadVideos();
     videoCache = videoCache.filter(v => v.id !== req.params.id);
-    await fs.writeJson(DATA_FILE, videoCache);
+    await writeVideos(videoCache);
     res.redirect('/secret-admin-panel-777');
 });
 
 app.post('/admin/clear', async (req, res) => {
     videoCache = [];
-    await fs.writeJson(DATA_FILE, videoCache);
+    await writeVideos(videoCache);
     res.redirect('/secret-admin-panel-777');
 });
 

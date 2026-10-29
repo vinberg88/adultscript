@@ -2,7 +2,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const ejs = require('ejs');
 const path = require('path');
+const http = require('http');
 const { app } = require('./index');
+const { siteForHost } = require('./site-profile');
 
 test('admin requires a password and rejects cross-site writes', async () => {
     const previous = process.env.ADMIN_PASSWORD;
@@ -34,11 +36,35 @@ test('renders imported metadata and the Pornhub embed URL', async () => {
         embedUrl: 'https://www.pornhub.com/embed/abc123',
         thumbnail: 'https://example.com/thumb.jpg', duration: '11:26', views: 3362, rating: 80
     };
-    const home = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { videos: [video], sort: 'latest' });
-    const detail = await ejs.renderFile(path.join(__dirname, 'views/video.ejs'), { video, related: [] });
+    const site = siteForHost('snusk.eu');
+    const home = await ejs.renderFile(path.join(__dirname, 'views/index.ejs'), { videos: [video], sort: 'latest', site });
+    const detail = await ejs.renderFile(path.join(__dirname, 'views/video.ejs'), { video, related: [], site });
     assert.match(home, /11:26/);
     assert.match(home, /3\s?362/);
     assert.match(detail, /https:\/\/www\.pornhub\.com\/embed\/abc123/);
     assert.doesNotMatch(home, /05:20/);
+    assert.match(home, /Snusk - Filmer/);
+});
+
+test('public pages use the requested domain name', async () => {
+    const server = app.listen(0, '127.0.0.1');
+    await new Promise(resolve => server.once('listening', resolve));
+    try {
+        const getForHost = host => new Promise((resolve, reject) => {
+            http.get({ hostname: '127.0.0.1', port: server.address().port, path: '/', headers: { Host: host } }, response => {
+                let body = '';
+                response.setEncoding('utf8');
+                response.on('data', chunk => { body += chunk; });
+                response.on('end', () => resolve(body));
+            }).on('error', reject);
+        });
+        const snusk = await getForHost('snusk.eu');
+        const swehub = await getForHost('swehub.com');
+        assert.match(snusk, /<title>Snusk - Filmer<\/title>/);
+        assert.match(swehub, /<title>SweHub - Filmer<\/title>/);
+        assert.doesNotMatch(snusk, /gratis-erotik\.se/);
+    } finally {
+        await new Promise(resolve => server.close(resolve));
+    }
 });
 

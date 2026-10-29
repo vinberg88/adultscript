@@ -6,26 +6,25 @@
 
 Node.js videoportal för cPanel. Importören hämtar metadata från Pornhubs Webmasters API och visar filmer med Pornhubs inbäddade spelare. Den laddar inte ned eller lagrar videofiler.
 
-## Installation i cPanel
+## Snabbstart för många sajter
 
-1. Skapa en Node.js-app med `index.js` som startfil och Node.js 22 eller senare. Kör `npm ci` i appens katalog.
-2. Skapa en unik installationskod, till exempel i WHM Terminal med `openssl rand -hex 32`. Kopiera koden till cPanels miljövariabel `INSTALL_TOKEN`. Lägg aldrig koden i GitHub eller i ett chattmeddelande.
-3. Välj **Redeploy** i cPanel för att hämta koden och tillämpa miljövariabeln. Öppna sedan `https://din-domän/install` i webbläsaren. Ange installationskoden, välj adminanvändare och lösenord, samt antal sidor och ett eventuellt sökord för importen.
-4. Efter installationen låses `/install`. Ta bort `INSTALL_TOKEN` från cPanel och välj **Redeploy** igen för att tillämpa ändringen. Adminpanelen finns på `/secret-admin-panel-777`.
+1. Skapa **en egen Node.js-app per domän** i cPanel. Välj Git-källan `https://github.com/vinberg88/adultscript.git` och Node.js 22 eller senare.
+2. Sätt ett **unikt långt `ADMIN_PASSWORD` per app** i Advanced vid skapandet eller i appens **App Env** efteråt. `ADMIN_USER` är valfritt och är `admin` som standard. Spara lösenorden i din lösenordshanterare, aldrig i Git eller sajtplansfilen.
+3. Välj **Deploy** eller **Redeploy**. Öppna domänen och adminpanelen på `/secret-admin-panel-777`. `/install` behövs inte med den här metoden.
 
-Installationssidan skriver bara `data/site.json` med en saltad hash av adminlösenordet och valen för importen. Den ändrar inte `videos.json`. Första importen börjar efter installationen och därefter vid midnatt enligt serverns tidszon. Befintliga poster sparas; nya Pornhub-poster läggs till utan dubbletter. Om API:t misslyckas lämnas filen orörd.
+Namnet hämtas automatiskt från domänens rad i `links.json`. För andra domäner används första delen av domännamnet, till exempel **Snusk** för `snusk.eu`. Du kan ändra namnet med `SITE_NAME` och accentfärgen med `SITE_ACCENT` (format `#RRGGBB`) i App Env. `PORN_HUB_IMPORT_PAGES` (1–5) och `PORN_HUB_SEARCH` styr varje apps egen filmimport. Ändringar i App Env kräver **Redeploy**.
 
-Samma repo kan installeras på en ny domän i en **egen** cPanel-app: använd en ny appmapp, en ny `INSTALL_TOKEN` och öppna den nya domänens `/install`. Varje sajt får då egna adminuppgifter och egen `data/site.json`. En redan installerad sajt uppdateras med Redeploy; dess `/install` förblir låst och filmerna ska bevaras. Länksidan finns på `/lankar` och länkarna i `links.json` följer med nya installationer.
+Varje app använder sin egen `data/videos.json`. Vid första starten kopieras en eventuell äldre `videos.json` dit utan att originalet tas bort. Innan du uppdaterar en befintlig sajt, ta ändå en separat säkerhetskopia av `videos.json` och `data/site.json` och kontrollera filmantalet efteråt. cPanels hantering av appdata vid redeploy måste verifieras på en testsajt innan samma uppdatering görs på alla sajter.
 
-För en befintlig sajt: kopiera `videos.json` till en plats utanför appmappen före uppdateringen. Spara även `data/site.json` efter installationen som del av din ordinarie säkerhetskopia. `data/site.json` hålls utanför Git; det befintliga `videos.json` är fortfarande en spårad fil och måste bevaras vid uppdateringar.
+Kör `npm run sites:plan -- sökväg/till/site-plan.csv` för att skapa en granskningslista av de **64 unika domänerna** i `links.json`. Fyll i status och eventuella sökord/färger i listan. Den innehåller inga lösenord och skapar inte appar i cPanel.
+
+## Valfri webbinstaller
+
+Vill du i stället välja adminuppgifter på en installationssida, sätt en unik `INSTALL_TOKEN` på minst 32 tecken i App Env, välj Redeploy och öppna `/install`. Efter installationen tar du bort `INSTALL_TOKEN` och väljer Redeploy igen. Installationen sparar en saltad lösenordshash i `data/site.json`. Den här metoden behövs inte för snabbstarten ovan.
 
 ## Reklamplatser
 
 De publika sidorna har två stora reklamplatser: en under sidhuvudet eller startsidans introduktion och en före sidfoten. Båda är märkta **Annons** och visar en platshållare tills annonskod har lagts till. Övre och nedre annonsen kan ändras var för sig i `views/partials/ad-top.ejs` respektive `views/partials/ad-bottom.ejs`. Mallarna används av startsidan, videosidan och länksidan. Lägg aldrig in privata nycklar eller lösenord i annonskoden.
-
-## Alternativ utan webbinstaller
-
-Om `INSTALL_TOKEN` inte är satt fortsätter appen att fungera med `ADMIN_USER` (standard `admin`) och `ADMIN_PASSWORD` i cPanels miljövariabler. `PORN_HUB_IMPORT_PAGES` (1–5) och `PORN_HUB_SEARCH` styr importen tills webbinstallationen har sparat egna val.
 
 ## GitHub-repo
 
