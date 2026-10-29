@@ -6,8 +6,8 @@ Node.js videoportal för cPanel. Importören hämtar metadata från Pornhubs Web
 
 1. Skapa en Node.js-app med `index.js` som startfil och Node.js 22 eller senare. Kör `npm ci` i appens katalog.
 2. Skapa en unik installationskod, till exempel i WHM Terminal med `openssl rand -hex 32`. Kopiera koden till cPanels miljövariabel `INSTALL_TOKEN`. Lägg aldrig koden i GitHub eller i ett chattmeddelande.
-3. Starta om appen och öppna `https://din-domän/install` i webbläsaren. Ange installationskoden, välj adminanvändare och lösenord, samt antal sidor och ett eventuellt sökord för importen.
-4. Efter installationen låses `/install`. Ta bort `INSTALL_TOKEN` från cPanel och starta om appen. Adminpanelen finns på `/secret-admin-panel-777`.
+3. Välj **Redeploy** i cPanel för att hämta koden och tillämpa miljövariabeln. Öppna sedan `https://din-domän/install` i webbläsaren. Ange installationskoden, välj adminanvändare och lösenord, samt antal sidor och ett eventuellt sökord för importen.
+4. Efter installationen låses `/install`. Ta bort `INSTALL_TOKEN` från cPanel och välj **Redeploy** igen för att tillämpa ändringen. Adminpanelen finns på `/secret-admin-panel-777`.
 
 Installationssidan skriver bara `data/site.json` med en saltad hash av adminlösenordet och valen för importen. Den ändrar inte `videos.json`. Första importen börjar efter installationen och därefter vid midnatt enligt serverns tidszon. Befintliga poster sparas; nya Pornhub-poster läggs till utan dubbletter. Om API:t misslyckas lämnas filen orörd.
 
@@ -24,3 +24,4 @@ Ge servern en separat SSH-nyckel och lägg endast den publika nyckeln som en skr
 ## Tester
 
 `npm test` kör tester utan att kontakta Pornhub.
+
